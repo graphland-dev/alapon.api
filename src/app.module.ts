@@ -14,6 +14,7 @@ import { MongooseModule } from '@nestjs/mongoose';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      ignoreEnvFile: process.env.NODE_ENV === 'prod',
     }),
     // ServeStaticModule.forRoot({
     //   rootPath: join(__dirname, '..', 'files'),
@@ -21,7 +22,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     // }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client/dist'),
-      exclude: ['/api/*', '/graphql'],
+      exclude: ['/api/(.*)', '/graphql'],
     }),
     MongooseModule.forRoot(process.env.DATABASE_URL, {
       dbName: 'offline-chat-' + process.env.NODE_ENV,
