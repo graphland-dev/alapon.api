@@ -16,7 +16,7 @@ export class ReferenceRequestResolver {
   ) {}
 
   @Query(() => ReferenceRequestsWithPagination, {
-    name: 'inventory__referenceRequests',
+    name: 'identity__referenceRequests',
   })
   findAll(
     @Args('where', { nullable: true }) where: CommonPaginationOnlyDto,
@@ -27,8 +27,29 @@ export class ReferenceRequestResolver {
         where,
         getGqlFields(info, 'nodes'),
         [
-          { path: 'requesterUser', model: User.name, foreignField: 'handle' },
-          { path: 'referenceUser', model: User.name, foreignField: 'handle' },
+          { path: 'requesterUser', model: User.name },
+          { path: 'referenceUser', model: User.name },
+        ],
+      );
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Query(() => ReferenceRequestsWithPagination, {
+    name: 'identity__myReferenceApprovalRequests',
+  })
+  requests(
+    @Args('where', { nullable: true }) where: CommonPaginationOnlyDto,
+    @Info() info: any,
+  ) {
+    try {
+      return this.referenceRequestService.findAllWithPagination(
+        where,
+        getGqlFields(info, 'nodes'),
+        [
+          { path: 'requesterUser', model: User.name },
+          { path: 'referenceUser', model: User.name },
         ],
       );
     } catch (error) {

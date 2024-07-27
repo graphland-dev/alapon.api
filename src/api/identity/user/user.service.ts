@@ -45,12 +45,12 @@ export class UserService extends BaseDatabaseRepository<User> {
       const secret = crypto.randomUUID();
 
       // create user
-      await this.createOne({ ...input, secret });
+      const createdUser = await this.createOne({ ...input, secret });
 
       // create reference request
       await this.referenceRequestService.createOne({
-        requesterUser: input.handle,
-        referenceUser: input.referenceHandle,
+        requesterUser: createdUser._id,
+        referenceUser: referenceUser._id,
         status: ReferenceRequestStatus.PENDING,
       });
 

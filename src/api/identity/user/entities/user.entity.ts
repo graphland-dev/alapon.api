@@ -5,8 +5,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
 export enum UserAccountStatus {
+  PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
   SUSPENDED = 'SUSPENDED',
 }
 registerEnumType(UserAccountStatus, { name: 'UserAccountStatus' });
@@ -36,7 +36,7 @@ export class User {
   @Prop()
   secret: string;
 
-  @Prop({ default: UserAccountStatus.ACTIVE })
+  @Prop({ default: UserAccountStatus.PENDING })
   @Field(() => UserAccountStatus, { nullable: true })
   accountStatus?: UserAccountStatus;
 

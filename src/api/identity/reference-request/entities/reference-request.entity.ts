@@ -21,11 +21,11 @@ export class ReferenceRequest {
   _id: string;
 
   @Field(() => User)
-  @Prop({ type: mongoose.Schema.Types.String, ref: User.name, lowercase: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
   requesterUser: User;
 
   @Field(() => User)
-  @Prop({ type: mongoose.Schema.Types.String, ref: User.name, lowercase: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
   referenceUser: User;
 
   @Field(() => ReferenceRequestStatus)
