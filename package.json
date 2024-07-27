@@ -7,8 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "npm-run-all --parallel start:dev start:client",
-    "build": "npm-run-all --parallel build build:client",
-    "build:api": "nest build",
+    "build": "nest build",
+    "postinstall": "npm run build:client",
+    "build:all": "npm-run-all --parallel build build:client",
     "build:client": "cd client && npm run build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start:client": "cd client && npm run dev",
