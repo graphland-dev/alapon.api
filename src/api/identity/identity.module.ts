@@ -4,6 +4,6 @@ import { ReferenceRequestModule } from './reference-request/reference-request.mo
 import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [UserModule, ReferenceRequestModule, AuthModule]
+  imports: [UserModule, ReferenceRequestModule, AuthModule],
 })
 export class IdentityModule {}
