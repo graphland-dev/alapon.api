@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import { LoginInput } from './dto/auth.dto';
+import { LoginInput, ResetPinInput } from './dto/auth.dto';
 import { UserService } from '../user/user.service';
 import { UserAccountStatus } from '../user/entities/user.entity';
 
@@ -30,7 +30,28 @@ export class AuthService {
       throw new ForbiddenException('Account is not active yet');
     }
     return {
-      token: jwt.sign({ handle: user.handle }, 'secret'),
+      token: jwt.sign({ handle: user.handle }, process.env.JWT_SECRET),
     };
+  }
+
+  async resetPin(input: ResetPinInput) {
+    // check if user exists
+    const user = await this.userService.userModel.findOne({
+      handle: input.handle,
+    });
+    if (!user) {
+      throw new ForbiddenException('Invalid secret or handle');
+    }
+
+    // check if secret is correct
+    if (user.secret !== input.secret) {
+      throw new ForbiddenException('Invalid secret or handle');
+    }
+
+    // change pin
+    user.pin = input.pin;
+    await user.save();
+
+    return true;
   }
 }

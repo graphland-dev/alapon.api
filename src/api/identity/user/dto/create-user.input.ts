@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, MaxLength, MinLength } from 'class-validator';
 
 @InputType()
 export class JoinUserInput {
@@ -17,5 +17,7 @@ export class JoinUserInput {
   @Field(() => String)
   @ApiProperty()
   @IsNotEmpty()
+  @MinLength(6)
+  @MaxLength(6)
   pin: number;
 }
