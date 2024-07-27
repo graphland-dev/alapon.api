@@ -15,13 +15,17 @@ import { MongooseModule } from '@nestjs/mongoose';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.DATABASE_URL, {
-      dbName: 'offline-chat-' + process.env.NODE_ENV,
-      retryDelay: 5000,
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'files'),
+    //   exclude: ['/api/*', '/graphql'],
+    // }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client/dist'),
       exclude: ['/api/*', '/graphql'],
+    }),
+    MongooseModule.forRoot(process.env.DATABASE_URL, {
+      dbName: 'offline-chat-' + process.env.NODE_ENV,
+      retryDelay: 5000,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

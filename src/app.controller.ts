@@ -5,7 +5,7 @@ export class AppController {
   @Get()
   getHello() {
     return {
-      message: 'Hello World',
+      message: 'Blackout Chat API is healthy!!',
     };
   }
 }
