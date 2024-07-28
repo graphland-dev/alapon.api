@@ -23,7 +23,7 @@ export class CreateChatMessageInput {
   @Field(() => String, { nullable: true })
   @ApiProperty()
   @IsOptional()
-  userId: string;
+  userId?: string;
 }
 
 @InputType()
