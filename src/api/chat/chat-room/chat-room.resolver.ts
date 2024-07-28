@@ -144,18 +144,18 @@ export class ChatRoomResolver {
     }
   }
 
-  @Mutation(() => Boolean, { name: 'chat__renoveGroupMembers' })
-  @Authenticated()
-  removeMembers(
-    @Args('input') input: GroupMemberMutationInput,
-    @AuthenticatedUser() user: IAuthUser,
-  ) {
-    try {
-      return this.chatRoomService.removeMembersFromGroup(input, user);
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
+  // @Mutation(() => Boolean, { name: 'chat__renoveGroupMembers' })
+  // @Authenticated()
+  // removeMembers(
+  //   @Args('input') input: GroupMemberMutationInput,
+  //   @AuthenticatedUser() user: IAuthUser,
+  // ) {
+  //   try {
+  //     return this.chatRoomService.removeMembersFromGroup(input, user);
+  //   } catch (error) {
+  //     throw new BadRequestException(error.message);
+  //   }
+  // }
 
   @Mutation(() => Boolean, { name: 'chat__kickGroupMembers' })
   @Authenticated()

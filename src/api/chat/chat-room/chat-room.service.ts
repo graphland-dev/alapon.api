@@ -107,9 +107,9 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     );
 
     // Send system message to room
-    handleUsers.forEach(async (user) => {
+    handleUsers.forEach(async (_user) => {
       await this.chatMessageService.sendMessageToRoom({
-        text: `@${user.handle} has been added as moderator`,
+        text: `@${_user.handle} has been added as moderator`,
         roomId: _room.id,
         messageType: ChatMessageType.SYSTEM_MESSAGE,
       });
@@ -149,9 +149,9 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     );
 
     // Send system message to room
-    handleUsers.forEach(async (user) => {
+    handleUsers.forEach(async (_user) => {
       await this.chatMessageService.sendMessageToRoom({
-        text: `@${user.handle} has been removed as moderator`,
+        text: `@${_user.handle} has been removed as moderator`,
         roomId: _room.id,
         messageType: ChatMessageType.SYSTEM_MESSAGE,
       });
@@ -179,7 +179,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
         .find({
           handle: { $in: input.memberHandles },
         })
-        .select('_id');
+        .select('_id handle');
 
       const res = await this.chatRoomModel.updateOne(
         { handle: slugify(input.groupHandle) },
@@ -190,7 +190,14 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
         },
       );
 
-      // TODO: send system message to room
+      // Send system message to room
+      handleUsers.forEach(async (_user) => {
+        await this.chatMessageService.sendMessageToRoom({
+          text: `@${_user.handle} has been added by @${user.handle}`,
+          roomId: _room.id,
+          messageType: ChatMessageType.SYSTEM_MESSAGE,
+        });
+      });
 
       return res.modifiedCount > 0;
     } else {
@@ -198,45 +205,45 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     }
   }
 
-  async removeMembersFromGroup(
-    input: GroupMemberMutationInput,
-    user: IAuthUser,
-  ) {
-    const _room = await this.chatRoomModel.findOne({
-      handle: slugify(input.groupHandle),
-      roomType: ChatRoomType.GROUP,
-    });
+  // async removeMembersFromGroup(
+  //   input: GroupMemberMutationInput,
+  //   user: IAuthUser,
+  // ) {
+  //   const _room = await this.chatRoomModel.findOne({
+  //     handle: slugify(input.groupHandle),
+  //     roomType: ChatRoomType.GROUP,
+  //   });
 
-    if (!_room) throw new NotFoundException('Invalid group handle');
+  //   if (!_room) throw new NotFoundException('Invalid group handle');
 
-    if (
-      _room.owner.toString() == user.sub ||
-      _room.moderators
-        .map((moderator) => moderator.toString())
-        .includes(user.sub)
-    ) {
-      const handleUsers = await this.userService.userModel
-        .find({
-          handle: { $in: input.memberHandles },
-        })
-        .select('_id');
+  //   if (
+  //     _room.owner.toString() == user.sub ||
+  //     _room.moderators
+  //       .map((moderator) => moderator.toString())
+  //       .includes(user.sub)
+  //   ) {
+  //     const handleUsers = await this.userService.userModel
+  //       .find({
+  //         handle: { $in: input.memberHandles },
+  //       })
+  //       .select('_id');
 
-      const res = await this.chatRoomModel.updateOne(
-        { handle: slugify(input.groupHandle) },
-        {
-          $pullAll: {
-            members: { $each: handleUsers.map((user) => user._id) },
-          },
-        },
-      );
-      // TODO: send system message to room
-      return res.modifiedCount > 0;
-    } else {
-      throw new ForbiddenException(
-        'You are not the owner/moderator of this group',
-      );
-    }
-  }
+  //     const res = await this.chatRoomModel.updateOne(
+  //       { handle: slugify(input.groupHandle) },
+  //       {
+  //         $pullAll: {
+  //           members: { $each: handleUsers.map((user) => user._id) },
+  //         },
+  //       },
+  //     );
+  //     // TODO: send system message to room
+  //     return res.modifiedCount > 0;
+  //   } else {
+  //     throw new ForbiddenException(
+  //       'You are not the owner/moderator of this group',
+  //     );
+  //   }
+  // }
 
   async unKickGroupMembers(input: GroupMemberMutationInput, user: IAuthUser) {
     const _room = await this.chatRoomModel.findOne({
@@ -256,19 +263,26 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
         .find({
           handle: { $in: input.memberHandles },
         })
-        .select('_id');
+        .select('_id handle');
 
       const res = await this.chatRoomModel.updateOne(
-        { handle: input.groupHandle },
+        { handle: slugify(input.groupHandle) },
         {
           $pullAll: {
             kickedUsers: handleUsers.map((user) => user._id),
           },
         },
       );
-      // TODO: send system message to room
-      // TODO: send system message to room
-      // input.memberHandles[].handle has been unbanned by @user.handle
+
+      // Send system message to room
+      // input.memberHandles[].handle has been kicked by @user.handle
+      handleUsers.forEach(async (_user) => {
+        await this.chatMessageService.sendMessageToRoom({
+          text: `@${_user.handle} has been unbanned by @${user.handle}`,
+          roomId: _room.id,
+          messageType: ChatMessageType.SYSTEM_MESSAGE,
+        });
+      });
       return res.modifiedCount > 0;
     } else {
       throw new ForbiddenException(
@@ -295,7 +309,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
         .find({
           handle: { $in: input.memberHandles },
         })
-        .select('_id');
+        .select('_id handle');
 
       const res = await this.chatRoomModel.updateOne(
         { handle: input.groupHandle },
@@ -305,8 +319,16 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
           },
         },
       );
-      // TODO: send system message to room
+
+      // Send system message to room
       // input.memberHandles[].handle has been kicked by @user.handle
+      handleUsers.forEach(async (_user) => {
+        await this.chatMessageService.sendMessageToRoom({
+          text: `@${_user.handle} has been kicked by @${user.handle}`,
+          roomId: _room.id,
+          messageType: ChatMessageType.SYSTEM_MESSAGE,
+        });
+      });
       return res.modifiedCount > 0;
     } else {
       throw new ForbiddenException(
