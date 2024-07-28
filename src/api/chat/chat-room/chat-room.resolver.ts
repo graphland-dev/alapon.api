@@ -9,6 +9,7 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import * as slug from 'slug';
 import { ChatRoomService } from './chat-room.service';
 import {
+  AddOrRemoveGroupMembersInput,
   AddOrRemoveGroupModeratorInput,
   CreateChatGroupInput,
 } from './dto/chat-room.input';
@@ -91,10 +92,31 @@ export class ChatRoomResolver {
     }
   }
 
-  // @Query(() => ChatRoom, { name: 'chatRoom' })
-  // findOne(@Args('id', { type: () => Int }) id: number) {
-  //   return this.chatRoomService.findOne(id);
-  // }
+  @Mutation(() => Boolean, { name: 'chat__addGroupMembers' })
+  @Authenticated()
+  addMembers(
+    @Args('input') input: AddOrRemoveGroupMembersInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.addMembersToGroup(input, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Mutation(() => Boolean, { name: 'chat__renoveGroupMembers' })
+  @Authenticated()
+  removeMembers(
+    @Args('input') input: AddOrRemoveGroupMembersInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.removeMembersFromGroup(input, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   // @Mutation(() => ChatRoom)
   // updateChatRoom(@Args('updateChatRoomInput') updateChatRoomInput: UpdateChatRoomInput) {

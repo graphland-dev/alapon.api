@@ -28,3 +28,16 @@ export class AddOrRemoveGroupModeratorInput {
   @IsNotEmpty()
   moderatorHandles: string[];
 }
+
+@InputType()
+export class AddOrRemoveGroupMembersInput {
+  @Field(() => String)
+  @ApiProperty()
+  @IsNotEmpty()
+  groupHandle: string;
+
+  @Field(() => [String])
+  @ApiProperty()
+  @IsNotEmpty()
+  memberHandles: string[];
+}
