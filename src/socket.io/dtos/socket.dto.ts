@@ -1,14 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
-export class SendSocketMessageDto {
+export class SendMessageToRoom {
   @ApiProperty()
   @IsNotEmpty()
-  userId: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  event: string;
+  roomId: string;
 
   @ApiProperty()
   @IsNotEmpty()

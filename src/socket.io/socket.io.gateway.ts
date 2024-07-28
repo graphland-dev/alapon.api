@@ -1,12 +1,9 @@
 import { Logger } from '@nestjs/common';
 import {
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsResponse,
 } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
 
@@ -27,41 +24,38 @@ export class SocketIoGateway
   constructor() {}
 
   async handleConnection(client: Socket) {
-    this.logger.debug('Someone tryin to connect to socket');
     // const token = client.handshake?.headers?.token as string;
-
-    // if (!token) {
-    //   this.logger.error(
-    //     'Failed to connect socket. Authorization token not passed',
-    //   );
-    //   client.disconnect();
-    //   return;
-    // }
     // const decoded = jwt.decode(token) as IAuthUser;
-
-    // if (!decoded) {
-    //   this.logger.error('Invalid token passed on socket connection');
-    //   client.disconnect();
-    //   return;
-    // }
-
+    this.logger.debug('Someone tryin to connect to socket');
     this.logger.debug(`Client connected: ${client.id}`);
     this.logger.debug(`Client connected: ${this.io.sockets.size}`);
   }
 
   async handleDisconnect(client: Socket) {
-    // const token = client.handshake?.headers?.token as string;
-    // const decoded = jwt.decode(token) as IAuthUser;
-
     this.logger.debug(`Client disconnected: ${client.id}`);
     this.logger.debug(`Client connected: ${this.io.sockets.size}`);
   }
 
-  @SubscribeMessage('events')
-  handleEvent(@MessageBody() data: unknown): WsResponse<unknown> {
-    const event = 'events';
-    return { event, data };
-  }
+  // @SubscribeMessage('join-room')
+  // async handleJoinRoom(
+  //   @MessageBody() data: { roomId: string; userId: string },
+  // ) {
+  //   this.io.socketsJoin(data.roomId);
+  //   this.logger.debug(`User joined room: ${data.roomId}`);
+  // }
+
+  // @SubscribeMessage('leave-room')
+  // async handleLeaveRoom(
+  //   @MessageBody() data: { roomId: string; userId: string },
+  // ) {
+  //   this.io.socketsLeave(data.roomId);
+  //   this.logger.debug(`User left room: ${data.roomId}`);
+  // }
+
+  // handleEvent(@MessageBody() data: unknown): WsResponse<unknown> {
+  //   const event = 'events';
+  //   return { event, data };
+  // }
 
   async sendMessageToSocketClients(
     clientIds: string[],
@@ -80,7 +74,6 @@ export class SocketIoGateway
    * @param data - data to send
    */
   async broadCastMessage(eventName: string, data: string) {
-    this.io.emit(eventName, data);
     this.logger.debug(
       `Message send to all users`,
       JSON.stringify({
@@ -88,5 +81,6 @@ export class SocketIoGateway
         data,
       }),
     );
+    return this.io.emit(eventName, data);
   }
 }
