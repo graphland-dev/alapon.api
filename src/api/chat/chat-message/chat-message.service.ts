@@ -13,6 +13,7 @@ import { ChatMessage, ChatMessageType } from './entities/chat-message.entity';
 import { ChatRoomService } from '../chat-room/chat-room.service';
 import { IAuthUser } from '@/authorization/decorators/user.decorator';
 import { CommonPaginationOnlyDto } from '@/common/dto/CommonPaginationDto';
+import { SocketIoGateway } from '@/socket.io/socket.io.gateway';
 
 @Injectable()
 export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
@@ -21,6 +22,7 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
     public readonly chatMessageModel: Model<ChatMessage>,
     @Inject(forwardRef(() => ChatRoomService))
     public readonly chatRoomService: ChatRoomService,
+    private readonly socketIoGateway: SocketIoGateway,
   ) {
     super(chatMessageModel);
   }
@@ -41,9 +43,12 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
       messageType: input?.messageType || ChatMessageType.USER_MESSAGE,
     });
 
-    // TODO: Send socket message to room
-    // TODO: Send push notification to room members
-    // socket channel: 'chatRoom:{roomId}'
+    // Send message to socket channel
+
+    await this.socketIoGateway.broadCastMessage(
+      `room-messages:${input.roomId}`,
+      JSON.stringify(message),
+    );
 
     return message;
   }
