@@ -1,7 +1,15 @@
+import { User } from '@/api/identity/user/entities/user.entity';
 import { Paginated } from '@/common/common-models/pagination-object';
-import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
+import { ChatRoom } from '../../chat-room/entities/chat-room.entity';
+
+export enum ChatMessageType {
+  SYSTEM_MESSAGE = 'SYSTEM_MESSAGE',
+  USER_MESSAGE = 'USER_MESSAGE',
+}
+registerEnumType(ChatMessageType, { name: 'ChatMessageType' });
 
 @ObjectType()
 @Schema({
@@ -11,6 +19,22 @@ import { HydratedDocument } from 'mongoose';
 export class ChatMessage {
   @Field(() => ID)
   _id: string;
+
+  @Field(() => ChatMessageType, { nullable: true })
+  @Prop({ default: ChatMessageType.USER_MESSAGE })
+  messageType: ChatMessageType;
+
+  @Field(() => String, { nullable: true })
+  @Prop()
+  text: string;
+
+  @Field(() => User, { nullable: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
+  createdBy: string;
+
+  @Field(() => ChatRoom, { nullable: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: ChatRoom.name })
+  chatRoom: string;
 
   @Field(() => Date, { nullable: true })
   createdAt?: Date;
