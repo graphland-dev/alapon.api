@@ -13,5 +13,6 @@ import { UserModule } from '@/api/identity/user/user.module';
     ]),
   ],
   providers: [ChatRoomResolver, ChatRoomService],
+  exports: [ChatRoomService],
 })
 export class ChatRoomModule {}

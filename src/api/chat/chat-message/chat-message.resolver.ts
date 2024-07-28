@@ -8,12 +8,17 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { ChatMessageService } from './chat-message.service';
 import { SendMessageToRoomInput } from './dto/chat-message.input';
 import { ChatMessage } from './entities/chat-message.entity';
+import { Authenticated } from '@/authorization/decorators/authenticated.decorator';
 
 @Resolver(() => ChatMessage)
 export class ChatMessageResolver {
   constructor(private readonly chatMessageService: ChatMessageService) {}
 
-  @Mutation(() => CommonMutationResponse)
+  @Mutation(() => CommonMutationResponse, {
+    name: 'chat__sendMessageToRoom',
+    description: 'Send message to chat room \n 🔐 Autneticated',
+  })
+  @Authenticated()
   sendMessageToRoom(
     @Args('input') input: SendMessageToRoomInput,
     @AuthenticatedUser() authUser: IAuthUser,
