@@ -24,7 +24,7 @@ body {
     @apply col-span-8;
   }
 
-  &__contacts {
+  &__rooms {
     @apply overflow-y-auto;
     @apply lg:h-[calc(100vh-13rem)] h-[calc(100vh-8rem)];
 
