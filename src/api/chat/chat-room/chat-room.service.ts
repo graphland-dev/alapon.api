@@ -136,7 +136,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
       .find({
         handle: { $in: input.moderatorHandles },
       })
-      .select('_id');
+      .select('_id handle');
 
     const res = await this.chatRoomModel.updateOne(
       { handle: slugify(input.groupHandle) },
@@ -148,7 +148,14 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
       },
     );
 
-    // TODO: send system message to room
+    // Send system message to room
+    handleUsers.forEach(async (user) => {
+      await this.chatMessageService.sendMessageToRoom({
+        text: `@${user.handle} has been removed as moderator`,
+        roomId: _room.id,
+        messageType: ChatMessageType.SYSTEM_MESSAGE,
+      });
+    });
 
     return res.modifiedCount > 0;
   }
