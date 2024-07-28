@@ -51,4 +51,35 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
 
     return res.modifiedCount > 0;
   }
+
+  async removeModeratorsToRoom(
+    input: AddOrRemoveGroupModeratorInput,
+    user: IAuthUser,
+  ) {
+    const _room = await this.chatRoomModel.findOne({
+      handle: input.groupHandle,
+    });
+
+    if (!_room) throw new NotFoundException('Invalid group handle');
+
+    if (_room.owner.toString() !== user.sub)
+      throw new ForbiddenException('You are not the owner of this group');
+
+    const handleUsers = await this.userService.userModel
+      .find({
+        handle: { $in: input.moderatorHandles },
+      })
+      .select('_id');
+
+    const res = await this.chatRoomModel.updateOne(
+      { handle: input.groupHandle },
+      {
+        $pullAll: {
+          moderators: handleUsers.map((user) => user._id),
+        },
+      },
+    );
+
+    return res.modifiedCount > 0;
+  }
 }

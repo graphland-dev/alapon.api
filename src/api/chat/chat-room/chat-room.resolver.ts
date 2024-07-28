@@ -78,6 +78,19 @@ export class ChatRoomResolver {
     }
   }
 
+  @Mutation(() => Boolean, { name: 'chat__removeGroupModerators' })
+  @Authenticated()
+  removeGroupModerators(
+    @Args('input') input: AddOrRemoveGroupModeratorInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.removeModeratorsToRoom(input, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   // @Query(() => ChatRoom, { name: 'chatRoom' })
   // findOne(@Args('id', { type: () => Int }) id: number) {
   //   return this.chatRoomService.findOne(id);
