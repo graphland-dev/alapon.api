@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ChatRoom } from './entities/chat-room.entity';
+import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
 import { IAuthUser } from '@/authorization/decorators/user.decorator';
 import { AddOrRemoveGroupModeratorInput } from './dto/chat-room.input';
 import { UserService } from '@/api/identity/user/user.service';
@@ -27,6 +27,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
   ) {
     const _room = await this.chatRoomModel.findOne({
       handle: input.groupHandle,
+      roomType: ChatRoomType.GROUP,
     });
 
     if (!_room) throw new NotFoundException('Invalid group handle');
@@ -58,6 +59,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
   ) {
     const _room = await this.chatRoomModel.findOne({
       handle: input.groupHandle,
+      roomType: ChatRoomType.GROUP,
     });
 
     if (!_room) throw new NotFoundException('Invalid group handle');
