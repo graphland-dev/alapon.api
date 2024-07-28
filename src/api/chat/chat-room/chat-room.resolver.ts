@@ -9,20 +9,28 @@ import {
   AuthenticatedUser,
   IAuthUser,
 } from '@/authorization/decorators/user.decorator';
+import * as slug from 'slug';
 
 @Resolver(() => ChatRoom)
 export class ChatRoomResolver {
   constructor(private readonly chatRoomService: ChatRoomService) {}
 
-  @Mutation(() => CommonMutationResponse, { name: 'chat__createChatRoom' })
+  @Mutation(() => CommonMutationResponse, { name: 'chat__createChatGroup' })
   @Authenticated()
-  createChatRoom(
+  async createChatRoom(
     @Args('input') input: CreateChatGroupInput,
     @AuthenticatedUser() user: IAuthUser,
   ) {
     try {
+      const _room = await this.chatRoomService.chatRoomModel.findOne({
+        handle: slug(input?.handle),
+        roomType: ChatRoomType.GROUP,
+      });
+      if (_room) throw new BadRequestException('Group handle already taken');
+
       return this.chatRoomService.createOne({
         ...input,
+        handle: slug(input?.handle),
         owner: user?.sub,
         roomType: ChatRoomType.GROUP,
       });

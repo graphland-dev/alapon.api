@@ -9,6 +9,7 @@ import { AppResolver } from './app.resolver';
 import { IdentityModule } from './api/identity/identity.module';
 import { ChatModule } from './api/chat/chat.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AuthorizationModule } from './authorization/authorization.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       autoSchemaFile: true,
     }),
     IdentityModule,
+    AuthorizationModule,
     ChatModule,
   ],
   controllers: [AppController],
