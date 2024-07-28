@@ -13,7 +13,7 @@ import {
   AddOrRemoveGroupModeratorInput,
   CreateChatGroupInput,
 } from './dto/chat-room.input';
-import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
+import { ChatRoom } from './entities/chat-room.entity';
 
 @Resolver(() => ChatRoom)
 export class ChatRoomResolver {
@@ -29,18 +29,7 @@ export class ChatRoomResolver {
     @AuthenticatedUser() user: IAuthUser,
   ) {
     try {
-      const _room = await this.chatRoomService.chatRoomModel.findOne({
-        handle: slug(input?.handle, '_'),
-      });
-      if (_room) throw new BadRequestException('Group handle already taken');
-
-      return this.chatRoomService.createOne({
-        ...input,
-        handle: slug(input?.handle, '_'),
-        members: [user?.sub],
-        owner: user?.sub,
-        roomType: ChatRoomType.GROUP,
-      });
+      return this.chatRoomService.createGroup(input, user);
     } catch (error) {
       throw new BadRequestException(error.message);
     }

@@ -1,9 +1,11 @@
 import { BaseDatabaseRepository } from '@/common/database/BaseDatabaseRepository';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as slug from 'slug';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
@@ -11,6 +13,7 @@ import { IAuthUser } from '@/authorization/decorators/user.decorator';
 import {
   AddOrRemoveGroupMembersInput,
   AddOrRemoveGroupModeratorInput,
+  CreateChatGroupInput,
 } from './dto/chat-room.input';
 import { UserService } from '@/api/identity/user/user.service';
 
@@ -22,6 +25,26 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     private readonly userService: UserService,
   ) {
     super(chatRoomModel);
+  }
+
+  async createGroup(input: CreateChatGroupInput, user: IAuthUser) {
+    const _room = await this.chatRoomModel.findOne({
+      handle: slug(input?.handle, '_'),
+    });
+    if (_room) throw new BadRequestException('Group handle already taken');
+
+    const res = await this.chatRoomModel.create({
+      ...input,
+      handle: slug(input?.handle, '_'),
+      members: [user?.sub],
+      owner: user?.sub,
+      roomType: ChatRoomType.GROUP,
+    });
+
+    // TODO: send system message to room
+    // Message: Group created by {user.handle}
+
+    return res;
   }
 
   async addModeratorsToRoom(
