@@ -34,7 +34,7 @@ export class ChatRoom {
 
   @Field(() => User, { nullable: true })
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
-  owner: User;
+  owner: string;
 
   @Field(() => [User], { nullable: true })
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: User.name })

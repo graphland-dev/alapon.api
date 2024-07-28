@@ -15,3 +15,16 @@ export class CreateChatGroupInput {
   @IsBoolean()
   isNsfw: boolean;
 }
+
+@InputType()
+export class AddOrRemoveGroupModeratorInput {
+  @Field(() => String)
+  @ApiProperty()
+  @IsNotEmpty()
+  groupHandle: string;
+
+  @Field(() => [String])
+  @ApiProperty()
+  @IsNotEmpty()
+  moderatorHandles: string[];
+}

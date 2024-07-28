@@ -1,15 +1,18 @@
 import { Authenticated } from '@/authorization/decorators/authenticated.decorator';
-import { CommonMutationResponse } from '@/common/reference-models/common-mutation.entity';
-import { BadRequestException } from '@nestjs/common';
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { ChatRoomService } from './chat-room.service';
-import { CreateChatGroupInput } from './dto/chat-room.input';
-import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
 import {
   AuthenticatedUser,
   IAuthUser,
 } from '@/authorization/decorators/user.decorator';
+import { CommonMutationResponse } from '@/common/reference-models/common-mutation.entity';
+import { BadRequestException } from '@nestjs/common';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import * as slug from 'slug';
+import { ChatRoomService } from './chat-room.service';
+import {
+  AddOrRemoveGroupModeratorInput,
+  CreateChatGroupInput,
+} from './dto/chat-room.input';
+import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
 
 @Resolver(() => ChatRoom)
 export class ChatRoomResolver {
@@ -26,8 +29,7 @@ export class ChatRoomResolver {
   ) {
     try {
       const _room = await this.chatRoomService.chatRoomModel.findOne({
-        handle: slug(input?.handle),
-        roomType: ChatRoomType.GROUP,
+        handle: slug(input?.handle, '_'),
       });
       if (_room) throw new BadRequestException('Group handle already taken');
 
@@ -63,10 +65,18 @@ export class ChatRoomResolver {
     }
   }
 
-  // @Query(() => [ChatRoom], { name: 'chatRoom' })
-  // findAll() {
-  //   return this.chatRoomService.findAll();
-  // }
+  @Mutation(() => Boolean, { name: 'chat__addGroupModerators' })
+  @Authenticated()
+  addGroupModerators(
+    @Args('input') input: AddOrRemoveGroupModeratorInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.addModeratorsToRoom(input, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   // @Query(() => ChatRoom, { name: 'chatRoom' })
   // findOne(@Args('id', { type: () => Int }) id: number) {
