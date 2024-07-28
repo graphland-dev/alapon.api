@@ -49,6 +49,11 @@ export class JoinUserResponse {
   @ApiProperty()
   @IsNotEmpty()
   secret: string;
+
+  @Field(() => String)
+  @ApiProperty()
+  @IsNotEmpty()
+  handle: string;
 }
 
 @InputType()

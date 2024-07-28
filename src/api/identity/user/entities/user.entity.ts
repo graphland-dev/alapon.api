@@ -20,7 +20,6 @@ export class User {
   @Field(() => ID)
   _id: string;
 
-  @Field(() => String)
   @Prop()
   pin: string;
 

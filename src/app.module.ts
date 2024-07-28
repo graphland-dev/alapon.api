@@ -10,6 +10,7 @@ import { IdentityModule } from './api/identity/identity.module';
 import { ChatModule } from './api/chat/chat.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthorizationModule } from './authorization/authorization.module';
+import { SocketIoModule } from './socket.io/socket.io.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AuthorizationModule } from './authorization/authorization.module';
     IdentityModule,
     AuthorizationModule,
     ChatModule,
+    SocketIoModule,
   ],
   controllers: [AppController],
   providers: [AppResolver],

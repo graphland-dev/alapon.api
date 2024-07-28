@@ -49,3 +49,11 @@ export class JoinOrLeaveGroupInput {
   @IsNotEmpty()
   groupHandle: string;
 }
+
+@InputType()
+export class JoinInPersonInput {
+  @Field(() => String)
+  @ApiProperty()
+  @IsNotEmpty()
+  userHandle: string;
+}

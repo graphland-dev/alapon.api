@@ -17,6 +17,7 @@ import {
   AddOrRemoveGroupModeratorInput,
   CreateChatGroupInput,
   GroupMemberMutationInput,
+  JoinInPersonInput,
   JoinOrLeaveGroupInput,
 } from './dto/chat-room.input';
 import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
@@ -33,6 +34,34 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     public readonly chatMessageService: ChatMessageService,
   ) {
     super(chatRoomModel);
+  }
+
+  async joinInPerson(input: JoinInPersonInput, authUser: IAuthUser) {
+    const _user = await this.userService.userModel.findOne({
+      handle: slugify(input.userHandle),
+    });
+    if (!_user) throw new NotFoundException('Invalid user handle');
+
+    const _room = await this.chatRoomModel.findOne({
+      roomType: ChatRoomType.PRIVATE,
+      members: { $in: [_user._id, authUser.sub] },
+    });
+    if (_room) throw new BadRequestException('You are already connected');
+
+    const res = await this.chatRoomModel.create({
+      members: [_user._id, authUser.sub],
+      roomType: ChatRoomType.PRIVATE,
+      owner: authUser?.sub,
+    });
+
+    // Send system message to room
+    await this.chatMessageService.sendMessageToRoom({
+      text: `@${_user.handle} has joined your private chat`,
+      roomId: res._id,
+      messageType: ChatMessageType.SYSTEM_MESSAGE,
+    });
+
+    return res;
   }
 
   myChatRooms(where: CommonPaginationOnlyDto, fields: any, user: IAuthUser) {
@@ -141,10 +170,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     const res = await this.chatRoomModel.updateOne(
       { handle: slugify(input.groupHandle) },
       {
-        $pullAll: {
-          moderators: handleUsers.map((user) => user._id),
-          members: handleUsers.map((user) => user._id),
-        },
+        $pullAll: { moderators: handleUsers.map((user) => user._id) },
       },
     );
 
@@ -299,6 +325,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
 
     if (!_room) throw new NotFoundException('Invalid group handle');
 
+    // TODO: don't allow to kick owner
     if (
       _room.owner.toString() == user.sub ||
       _room.moderators
@@ -363,11 +390,18 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     );
     // TODO: send system message to room
     // user.handle has been added to @input.groupHandle
+    await this.chatMessageService.sendMessageToRoom({
+      text: `@${user.handle} joined`,
+      roomId: _room.id,
+      messageType: ChatMessageType.SYSTEM_MESSAGE,
+    });
 
     return res.modifiedCount > 0;
   }
 
   async leaveGroup(input: JoinOrLeaveGroupInput, user: IAuthUser) {
+    // TODO: don't allow to leave owner
+
     const _room = await this.chatRoomModel.findOne({
       handle: slugify(input.groupHandle),
       roomType: ChatRoomType.GROUP,
@@ -396,7 +430,11 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
       },
     );
     // TODO: send system message to room
-    // user.handle leaved @input.groupHandle
+    await this.chatMessageService.sendMessageToRoom({
+      text: `@${user.handle} left`,
+      roomId: _room.id,
+      messageType: ChatMessageType.SYSTEM_MESSAGE,
+    });
 
     return res.modifiedCount > 0;
   }

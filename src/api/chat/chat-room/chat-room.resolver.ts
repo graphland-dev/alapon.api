@@ -14,6 +14,7 @@ import {
   AddOrRemoveGroupModeratorInput,
   CreateChatGroupInput,
   GroupMemberMutationInput,
+  JoinInPersonInput,
   JoinOrLeaveGroupInput,
 } from './dto/chat-room.input';
 import { ChatRoom, ChatRoomsWithPagination } from './entities/chat-room.entity';
@@ -126,6 +127,19 @@ export class ChatRoomResolver {
   ) {
     try {
       return this.chatRoomService.joinGroup(input, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Mutation(() => CommonMutationResponse, { name: 'chat__joinInPerson' })
+  @Authenticated()
+  joinInPerson(
+    @Args('input') input: JoinInPersonInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.joinInPerson(input, user);
     } catch (error) {
       throw new BadRequestException(error.message);
     }

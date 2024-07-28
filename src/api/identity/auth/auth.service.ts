@@ -120,7 +120,7 @@ export class AuthService {
 
       // commit transaction
       await session.commitTransaction();
-      return { secret };
+      return { secret, handle: createdUser.handle };
     } catch (error) {
       await session.abortTransaction();
       throw error;
