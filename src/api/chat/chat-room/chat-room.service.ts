@@ -54,6 +54,8 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
       },
     );
 
+    // TODO: send system message to room
+
     return res.modifiedCount > 0;
   }
 
@@ -87,6 +89,8 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
       },
     );
 
+    // TODO: send system message to room
+
     return res.modifiedCount > 0;
   }
 
@@ -119,6 +123,8 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
           },
         },
       );
+
+      // TODO: send system message to room
 
       return res.modifiedCount > 0;
     } else {
@@ -157,7 +163,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
           },
         },
       );
-
+      // TODO: send system message to room
       return res.modifiedCount > 0;
     } else {
       throw new ForbiddenException(
