@@ -56,12 +56,12 @@ export class JoinUserInput {
   @Field(() => String)
   @ApiProperty()
   @IsNotEmpty()
-  handle: number;
+  handle: string;
 
   @Field(() => String)
   @ApiProperty()
   @IsNotEmpty()
-  referenceHandle: number;
+  referenceHandle: string;
 
   @Field(() => String)
   @ApiProperty()

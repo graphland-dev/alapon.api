@@ -1,6 +1,8 @@
+import * as slug from 'slug';
+
 export const slugify = (data: string) => {
   if (!data) {
     data = '';
   }
-  return data?.trim()?.split(' ').join('-');
+  return slug(data?.trim(), '_');
 };

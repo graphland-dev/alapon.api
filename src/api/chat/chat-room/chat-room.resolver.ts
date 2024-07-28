@@ -3,21 +3,44 @@ import {
   AuthenticatedUser,
   IAuthUser,
 } from '@/authorization/decorators/user.decorator';
+import { CommonPaginationOnlyDto } from '@/common/dto/CommonPaginationDto';
 import { CommonMutationResponse } from '@/common/reference-models/common-mutation.entity';
+import getGqlFields from '@/common/utils/gql-fields';
+import { slugify } from '@/common/utils/slug';
 import { BadRequestException } from '@nestjs/common';
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import * as slug from 'slug';
+import { Args, Info, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ChatRoomService } from './chat-room.service';
 import {
-  AddOrRemoveGroupMembersInput,
   AddOrRemoveGroupModeratorInput,
   CreateChatGroupInput,
+  GroupMemberMutationInput,
+  JoinOrLeaveGroupInput,
 } from './dto/chat-room.input';
-import { ChatRoom } from './entities/chat-room.entity';
+import { ChatRoom, ChatRoomsWithPagination } from './entities/chat-room.entity';
 
 @Resolver(() => ChatRoom)
 export class ChatRoomResolver {
   constructor(private readonly chatRoomService: ChatRoomService) {}
+
+  @Query(() => ChatRoomsWithPagination, {
+    name: 'chat__myChatRooms',
+  })
+  @Authenticated()
+  myChatRooms(
+    @Args('where', { nullable: true }) where: CommonPaginationOnlyDto,
+    @Info() info: any,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.myChatRooms(
+        where,
+        getGqlFields(info, 'nodes'),
+        user,
+      );
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   @Mutation(() => CommonMutationResponse, {
     name: 'chat__createChatGroup',
@@ -45,12 +68,12 @@ export class ChatRoomResolver {
     try {
       const _handleRoomCount =
         await this.chatRoomService.chatRoomModel.countDocuments({
-          handle: slug(handle, '_'),
+          handle: slugify(handle),
         });
 
       return _handleRoomCount > 0
-        ? slug(handle, '_') + '_' + _handleRoomCount
-        : slug(handle, '_');
+        ? slugify(handle) + '_' + _handleRoomCount
+        : slugify(handle);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -85,7 +108,7 @@ export class ChatRoomResolver {
   @Mutation(() => Boolean, { name: 'chat__addGroupMembers' })
   @Authenticated()
   addMembers(
-    @Args('input') input: AddOrRemoveGroupMembersInput,
+    @Args('input') input: GroupMemberMutationInput,
     @AuthenticatedUser() user: IAuthUser,
   ) {
     try {
@@ -95,10 +118,36 @@ export class ChatRoomResolver {
     }
   }
 
+  @Mutation(() => Boolean, { name: 'chat__joinGroup' })
+  @Authenticated()
+  joinGroup(
+    @Args('input') input: JoinOrLeaveGroupInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.joinGroup(input, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Mutation(() => Boolean, { name: 'chat__leaveGroup' })
+  @Authenticated()
+  leaveGroup(
+    @Args('input') input: JoinOrLeaveGroupInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.leaveGroup(input, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   @Mutation(() => Boolean, { name: 'chat__renoveGroupMembers' })
   @Authenticated()
   removeMembers(
-    @Args('input') input: AddOrRemoveGroupMembersInput,
+    @Args('input') input: GroupMemberMutationInput,
     @AuthenticatedUser() user: IAuthUser,
   ) {
     try {
@@ -108,13 +157,29 @@ export class ChatRoomResolver {
     }
   }
 
-  // @Mutation(() => ChatRoom)
-  // updateChatRoom(@Args('updateChatRoomInput') updateChatRoomInput: UpdateChatRoomInput) {
-  //   return this.chatRoomService.update(updateChatRoomInput.id, updateChatRoomInput);
-  // }
+  @Mutation(() => Boolean, { name: 'chat__kickGroupMembers' })
+  @Authenticated()
+  kickMembers(
+    @Args('input') input: GroupMemberMutationInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.kickMembersFromGroup(input, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
-  // @Mutation(() => ChatRoom)
-  // removeChatRoom(@Args('id', { type: () => Int }) id: number) {
-  //   return this.chatRoomService.remove(id);
-  // }
+  @Mutation(() => Boolean, { name: 'chat__unKickGroupMembers' })
+  @Authenticated()
+  unKickGroupMembers(
+    @Args('input') input: GroupMemberMutationInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.unKickGroupMembers(input, user);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 }

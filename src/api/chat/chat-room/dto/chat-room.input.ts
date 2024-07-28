@@ -7,7 +7,7 @@ export class CreateChatGroupInput {
   @Field(() => String)
   @ApiProperty()
   @IsNotEmpty()
-  handle: number;
+  handle: string;
 
   @Field(() => Boolean)
   @ApiProperty()
@@ -30,7 +30,7 @@ export class AddOrRemoveGroupModeratorInput {
 }
 
 @InputType()
-export class AddOrRemoveGroupMembersInput {
+export class GroupMemberMutationInput {
   @Field(() => String)
   @ApiProperty()
   @IsNotEmpty()
@@ -40,4 +40,12 @@ export class AddOrRemoveGroupMembersInput {
   @ApiProperty()
   @IsNotEmpty()
   memberHandles: string[];
+}
+
+@InputType()
+export class JoinOrLeaveGroupInput {
+  @Field(() => String)
+  @ApiProperty()
+  @IsNotEmpty()
+  groupHandle: string;
 }

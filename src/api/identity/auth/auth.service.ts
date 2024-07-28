@@ -12,6 +12,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { ReferenceRequestService } from '../reference-request/reference-request.service';
 import { ReferenceRequestStatus } from '../reference-request/entities/reference-request.entity';
+import { slugify } from '@/common/utils/slug';
 
 @Injectable()
 export class AuthService {
@@ -84,13 +85,13 @@ export class AuthService {
 
     // check handle is available
     const user = await this.userService.userModel.findOne({
-      handle: input.handle,
+      handle: slugify(input.handle),
     });
     if (user) throw new BadRequestException('Handle is already taken');
 
     // check referenceHandle is available
     const referenceUser = await this.userService.userModel.findOne({
-      handle: input.referenceHandle,
+      handle: slugify(input.referenceHandle),
     });
 
     if (!referenceUser)
@@ -106,6 +107,7 @@ export class AuthService {
       // create user
       const createdUser = await this.userService.createOne({
         ...input,
+        handle: slugify(input.handle),
         secret,
       });
 
