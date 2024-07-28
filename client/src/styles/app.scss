@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-slate-200;
+}
+
+.chat-app {
+  @apply overflow-hidden;
+  @apply transition-all duration-300;
+  @apply lg:mx-20 lg:my-10;
+  @apply bg-offWhite;
+  @apply lg:h-[calc(100vh-5rem)] h-screen;
+  @apply grid grid-cols-12;
+  @apply lg:rounded-md shadow-2xl;
+
+  &__sidebar {
+    @apply col-span-4;
+    @apply bg-white;
+  }
+
+  &__main {
+    @apply col-span-8;
+  }
+
+  &__contacts {
+    @apply overflow-y-auto;
+    @apply lg:h-[calc(100vh-13rem)] h-[calc(100vh-8rem)];
+
+    &::-webkit-scrollbar {
+      width: 0.4rem;
+    }
+
+    // &::-webkit-scrollbar-track {
+    //   // box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    // }
+
+    // &::-webkit-scrollbar-thumb {
+    //   @apply bg-gray-300 rounded-sm;
+    // }
+  }
+}
