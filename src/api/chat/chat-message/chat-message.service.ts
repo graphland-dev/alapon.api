@@ -1,6 +1,8 @@
 import { BaseDatabaseRepository } from '@/common/database/BaseDatabaseRepository';
 import {
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -17,6 +19,7 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
   constructor(
     @InjectModel(ChatMessage.name)
     public readonly chatMessageModel: Model<ChatMessage>,
+    @Inject(forwardRef(() => ChatRoomService))
     public readonly chatRoomService: ChatRoomService,
   ) {
     super(chatMessageModel);

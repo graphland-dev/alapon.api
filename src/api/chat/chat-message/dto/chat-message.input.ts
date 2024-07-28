@@ -18,7 +18,7 @@ export class CreateChatMessageInput {
   @Field(() => String)
   @ApiProperty()
   @IsNotEmpty()
-  roomId: ChatMessageType;
+  roomId: string;
 
   @Field(() => String, { nullable: true })
   @ApiProperty()

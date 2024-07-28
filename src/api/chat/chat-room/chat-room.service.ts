@@ -6,6 +6,8 @@ import { slugify } from '@/common/utils/slug';
 import {
   BadRequestException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -18,6 +20,8 @@ import {
   JoinOrLeaveGroupInput,
 } from './dto/chat-room.input';
 import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
+import { ChatMessageService } from '../chat-message/chat-message.service';
+import { ChatMessageType } from '../chat-message/entities/chat-message.entity';
 
 @Injectable()
 export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
@@ -25,6 +29,8 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     @InjectModel(ChatRoom.name)
     public readonly chatRoomModel: Model<ChatRoom>,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => ChatMessageService))
+    public readonly chatMessageService: ChatMessageService,
   ) {
     super(chatRoomModel);
   }
@@ -59,8 +65,14 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
       roomType: ChatRoomType.GROUP,
     });
 
-    // TODO: send system message to room
+    // Send system message to room
     // Message: Group created by {user.handle}
+    await this.chatMessageService.sendMessageToRoom({
+      text: `Group created by @${user.handle}`,
+      roomId: res._id,
+      userId: user.sub,
+      messageType: ChatMessageType.SYSTEM_MESSAGE,
+    });
 
     return res;
   }
