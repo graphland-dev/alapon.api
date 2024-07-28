@@ -37,6 +37,7 @@ export class ChatRoomResolver {
       return this.chatRoomService.createOne({
         ...input,
         handle: slug(input?.handle, '_'),
+        members: [user?.sub],
         owner: user?.sub,
         roomType: ChatRoomType.GROUP,
       });
