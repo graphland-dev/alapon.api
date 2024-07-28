@@ -25,7 +25,7 @@ export class User {
   pin: string;
 
   @Field(() => String)
-  @Prop()
+  @Prop({ lowercase: true })
   handle: string;
 
   @Field(() => String)

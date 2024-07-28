@@ -1,20 +1,19 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { JoinUserInput } from './dto/create-user.input';
+import { Args, Resolver } from '@nestjs/graphql';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
-import { BadRequestException } from '@nestjs/common';
-import { JoinUserResponse } from './dto/join-user-response.dto';
+import { Query } from '@nestjs/graphql';
+import * as slug from 'slug';
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Mutation(() => JoinUserResponse)
-  join(@Args('input') input: JoinUserInput) {
-    try {
-      return this.userService.joinUser(input);
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+  @Query(() => String, { name: 'identity__getUniqueHandle' })
+  async getUserHandle(@Args('handle') handle: string) {
+    const _count = await this.userService.userModel.countDocuments({
+      handle: slug(handle, '_'),
+    });
+
+    return _count ? slug(handle, '_') + '_' + _count : slug(handle, '_');
   }
 }

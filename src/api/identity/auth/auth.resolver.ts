@@ -1,7 +1,13 @@
 import { BadRequestException } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { LoginInput, LoginResponse, ResetPinInput } from './dto/auth.dto';
+import {
+  JoinUserInput,
+  JoinUserResponse,
+  LoginInput,
+  LoginResponse,
+  ResetPinInput,
+} from './dto/auth.dto';
 
 @Resolver()
 export class AuthResolver {
@@ -13,6 +19,17 @@ export class AuthResolver {
   createAuth(@Args('input') input: LoginInput) {
     try {
       return this.authService.loginUser(input);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Mutation(() => JoinUserResponse, {
+    name: 'identity__join',
+  })
+  join(@Args('input') input: JoinUserInput) {
+    try {
+      return this.authService.joinUser(input);
     } catch (error) {
       throw new BadRequestException(error.message);
     }

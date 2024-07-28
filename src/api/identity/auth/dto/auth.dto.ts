@@ -42,3 +42,31 @@ export class LoginResponse {
   @Field()
   token: string;
 }
+
+@ObjectType()
+export class JoinUserResponse {
+  @Field(() => String)
+  @ApiProperty()
+  @IsNotEmpty()
+  secret: string;
+}
+
+@InputType()
+export class JoinUserInput {
+  @Field(() => String)
+  @ApiProperty()
+  @IsNotEmpty()
+  handle: number;
+
+  @Field(() => String)
+  @ApiProperty()
+  @IsNotEmpty()
+  referenceHandle: number;
+
+  @Field(() => String)
+  @ApiProperty()
+  @IsNotEmpty()
+  @MinLength(6)
+  @MaxLength(6)
+  pin: number;
+}
