@@ -1,8 +1,8 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { BasicStrategy } from 'passport-http';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class BasicAuthStrategy extends PassportStrategy(
@@ -32,13 +32,15 @@ export class BasicAuthStrategy extends PassportStrategy(
     );
 
     if (
-      this.configService.get<string>('auth.basic.username') === username &&
-      this.configService.get<string>('auth.basic.password') === password
+      this.configService.get<string>('AUTH_BASIC_USERNAME') === username &&
+      this.configService.get<string>('AUTH_BASIC_PASSWORD') === password
     ) {
       return true;
     }
-    throw new UnauthorizedException(
-      'Invalid username or password. Please try again.',
-    );
+
+    return false;
+    // throw new UnauthorizedException(
+    //   'Invalid username or password. Please try again.',
+    // );
   };
 }

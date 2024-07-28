@@ -1,26 +1,15 @@
+import { BaseDatabaseRepository } from '@/common/database/BaseDatabaseRepository';
 import { Injectable } from '@nestjs/common';
-import { CreateChatRoomInput } from './dto/create-chat-room.input';
-import { UpdateChatRoomInput } from './dto/update-chat-room.input';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { ChatRoom } from './entities/chat-room.entity';
 
 @Injectable()
-export class ChatRoomService {
-  create(createChatRoomInput: CreateChatRoomInput) {
-    return 'This action adds a new chatRoom';
-  }
-
-  findAll() {
-    return `This action returns all chatRoom`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} chatRoom`;
-  }
-
-  update(id: number, updateChatRoomInput: UpdateChatRoomInput) {
-    return `This action updates a #${id} chatRoom`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} chatRoom`;
+export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
+  constructor(
+    @InjectModel(ChatRoom.name)
+    public readonly chatRoomModel: Model<ChatRoom>,
+  ) {
+    super(chatRoomModel);
   }
 }

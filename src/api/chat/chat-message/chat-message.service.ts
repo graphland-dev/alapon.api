@@ -1,26 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { CreateChatMessageInput } from './dto/create-chat-message.input';
-import { UpdateChatMessageInput } from './dto/update-chat-message.input';
+import { InjectModel } from '@nestjs/mongoose';
+import { ChatMessage } from './entities/chat-message.entity';
+import { Model } from 'mongoose';
+import { BaseDatabaseRepository } from '@/common/database/BaseDatabaseRepository';
 
 @Injectable()
-export class ChatMessageService {
-  create(createChatMessageInput: CreateChatMessageInput) {
-    return 'This action adds a new chatMessage';
-  }
-
-  findAll() {
-    return `This action returns all chatMessage`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} chatMessage`;
-  }
-
-  update(id: number, updateChatMessageInput: UpdateChatMessageInput) {
-    return `This action updates a #${id} chatMessage`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} chatMessage`;
+export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
+  constructor(
+    @InjectModel(ChatMessage.name)
+    public readonly chatMessageModel: Model<ChatMessage>,
+  ) {
+    super(chatMessageModel);
   }
 }

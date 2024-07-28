@@ -28,11 +28,11 @@ export class User {
   @Prop({ lowercase: true })
   handle: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Prop()
   referenceHandle: string;
 
-  @Field(() => String)
+  // @Field(() => String)
   @Prop()
   secret: string;
 

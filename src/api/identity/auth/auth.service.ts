@@ -40,7 +40,10 @@ export class AuthService {
       throw new ForbiddenException('Account is not active yet');
     }
     return {
-      token: jwt.sign({ handle: user.handle }, process.env.JWT_SECRET),
+      token: jwt.sign(
+        { handle: user.handle, sub: user._id },
+        process.env.JWT_SECRET,
+      ),
     };
   }
 
