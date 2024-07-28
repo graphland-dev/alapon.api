@@ -15,7 +15,10 @@ import * as slug from 'slug';
 export class ChatRoomResolver {
   constructor(private readonly chatRoomService: ChatRoomService) {}
 
-  @Mutation(() => CommonMutationResponse, { name: 'chat__createChatGroup' })
+  @Mutation(() => CommonMutationResponse, {
+    name: 'chat__createChatGroup',
+    description: 'Create a new chat group \n 🔐 Authenticated',
+  })
   @Authenticated()
   async createChatRoom(
     @Args('input') input: CreateChatGroupInput,
@@ -30,10 +33,31 @@ export class ChatRoomResolver {
 
       return this.chatRoomService.createOne({
         ...input,
-        handle: slug(input?.handle),
+        handle: slug(input?.handle, '_'),
         owner: user?.sub,
         roomType: ChatRoomType.GROUP,
       });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Mutation(() => String, {
+    name: 'chat__getUniqueRoomHandle',
+    description: 'Get a unique room handle',
+  })
+  async getUniqueGroupHandle(
+    @Args('handle', { type: () => String }) handle: string,
+  ) {
+    try {
+      const _handleRoomCount =
+        await this.chatRoomService.chatRoomModel.countDocuments({
+          handle: slug(handle, '_'),
+        });
+
+      return _handleRoomCount > 0
+        ? slug(handle, '_') + '_' + _handleRoomCount
+        : slug(handle, '_');
     } catch (error) {
       throw new BadRequestException(error.message);
     }
