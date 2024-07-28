@@ -236,7 +236,7 @@ export abstract class BaseDatabaseRepository<MODEL_TYPE> {
 
   hasMutationPermission(authUser: IAuthUser, document: any) {
     if (!document?.['user']) return true;
-    if (authUser.roles?.includes('super_admin')) return true;
+    // if (authUser.roles?.includes('super_admin')) return true;
     if (document?.user.equals(authUser?.sub)) return true;
 
     return false;

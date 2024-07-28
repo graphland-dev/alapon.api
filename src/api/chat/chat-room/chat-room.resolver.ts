@@ -5,6 +5,10 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { ChatRoomService } from './chat-room.service';
 import { CreateChatGroupInput } from './dto/chat-room.input';
 import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
+import {
+  AuthenticatedUser,
+  IAuthUser,
+} from '@/authorization/decorators/user.decorator';
 
 @Resolver(() => ChatRoom)
 export class ChatRoomResolver {
@@ -12,11 +16,14 @@ export class ChatRoomResolver {
 
   @Mutation(() => CommonMutationResponse, { name: 'chat__createChatRoom' })
   @Authenticated()
-  createChatRoom(@Args('input') input: CreateChatGroupInput) {
+  createChatRoom(
+    @Args('input') input: CreateChatGroupInput,
+    @AuthenticatedUser() user: IAuthUser,
+  ) {
     try {
       return this.chatRoomService.createOne({
         ...input,
-        // owner: this.user.id,
+        owner: user?.sub,
         roomType: ChatRoomType.GROUP,
       });
     } catch (error) {

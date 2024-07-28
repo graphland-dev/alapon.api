@@ -41,8 +41,16 @@ export class AuthService {
     }
     return {
       token: jwt.sign(
-        { handle: user.handle, sub: user._id },
+        {
+          handle: user?.handle,
+          accountStatus: user?.accountStatus,
+        },
         process.env.JWT_SECRET,
+        {
+          subject: user?._id.toString(),
+          issuer: 'backout.app',
+          audience: 'backout.app',
+        },
       ),
     };
   }

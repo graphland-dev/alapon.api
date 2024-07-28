@@ -1,3 +1,4 @@
+import { UserAccountStatus } from '@/api/identity/user/entities/user.entity';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 
@@ -5,11 +6,8 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 
 export interface IAuthUser {
   sub: string;
-  name: string;
-  email: string;
-  email_verified?: boolean;
-  tenantId?: string;
-  roles: string[];
+  handle: string;
+  accountStatus: UserAccountStatus;
   iat: number;
   exp: number;
   aud: string;

@@ -14,7 +14,7 @@ registerEnumType(ChatRoomType, { name: 'ChatRoomType' });
 @ObjectType()
 @Schema({
   timestamps: true,
-  collection: 'identity__ChatRoom',
+  collection: 'chat__ChatRoom',
 })
 export class ChatRoom {
   @Field(() => ID)
