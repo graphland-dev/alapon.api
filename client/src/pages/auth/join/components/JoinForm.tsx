@@ -1,4 +1,4 @@
-import { Button, Input, Paper, PinInput } from '@mantine/core';
+import { Alert, Button, Input, Paper, PinInput } from '@mantine/core';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -10,8 +10,9 @@ import { useDebouncedCallback } from '@mantine/hooks';
 interface Props {
   onSubmit: (data: IForm) => void;
   loading?: boolean;
+  apiError?: string;
 }
-const JoinForm: React.FC<Props> = ({ onSubmit, loading }) => {
+const JoinForm: React.FC<Props> = ({ onSubmit, loading, apiError }) => {
   const [uniqueHandleQuery] = useLazyQuery(UNIQUE_HANDLE_QUERY);
 
   const form = useForm<IForm>({
@@ -45,6 +46,12 @@ const JoinForm: React.FC<Props> = ({ onSubmit, loading }) => {
             a reference handle to join.
           </p>
         </div>
+
+        {apiError && (
+          <Alert color="red" title="Hands up" radius="md">
+            {apiError}
+          </Alert>
+        )}
 
         <form
           method="POST"
@@ -114,7 +121,7 @@ export default JoinForm;
 const validationSchema = yup.object({
   handle: yup.string().required().label('Handle'),
   referenceHandle: yup.string().required().label('Reference Handle'),
-  pin: yup.string().required('Your pin is required').label('Pin'),
+  pin: yup.string().required('Your pin is required').min(6).max(6).label('Pin'),
 });
 
 type IForm = yup.InferType<typeof validationSchema>;

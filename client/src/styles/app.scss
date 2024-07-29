@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  .link {
+    @apply text-blue-600 hover:underline;
+  }
+
   :root {
     --body: #f4f4f5;
 
