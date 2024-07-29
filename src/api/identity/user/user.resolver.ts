@@ -15,7 +15,11 @@ export class UserResolver {
     const _count = await this.userService.userModel.countDocuments({
       handle: slug(handle, '_'),
     });
-    return _count ? slug(handle, '_') + '_' + _count : slug(handle, '_');
+
+    const _random3Digits = Math.floor(Math.random() * 1000);
+    const _randomNumber = _count > 0 ? _random3Digits + _count : _random3Digits;
+
+    return _count ? slug(handle, '_') + '_' + _randomNumber : slug(handle, '_');
   }
 
   @Query(() => UsersWithPagination, {
