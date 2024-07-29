@@ -1,6 +1,5 @@
 import { Field, Float, InputType, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema } from '@nestjs/mongoose';
-import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
 
 @ObjectType()
