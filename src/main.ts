@@ -1,21 +1,20 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
 import * as cowsay from 'cowsay';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
-  const docOptions = new DocumentBuilder()
-    .setTitle('Blackout API')
-    .addBearerAuth()
-    .addBasicAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, docOptions);
-  SwaggerModule.setup(config.get('DOC_URL'), app, document);
+  // const docOptions = new DocumentBuilder()
+  //   .setTitle('Blackout API')
+  //   .addBearerAuth()
+  //   .addBasicAuth()
+  //   .build();
+  // const document = SwaggerModule.createDocument(app, docOptions);
+  // SwaggerModule.setup(config.get('DOC_URL'), app, document);
 
   app.useGlobalPipes(
     new ValidationPipe({

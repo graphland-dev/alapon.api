@@ -1,15 +1,11 @@
-import { createHashRouter, Link } from 'react-router-dom';
+import { createHashRouter } from 'react-router-dom';
 import { chatRouter } from './pages/chat/chat.router';
+import HomePage from './pages/index/index.page';
 
 export const AppRoute = createHashRouter([
   {
     path: '/',
-    element: (
-      <div>
-        <Link to="/chat/1">Chat 1</Link>
-        <Link to="/chat/2">Chat 2</Link>
-      </div>
-    ),
+    element: <HomePage />,
   },
   {
     path: '/chat',
