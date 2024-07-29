@@ -10,17 +10,7 @@ export const authRouter: RouteObject[] = [
     children: [
       {
         path: 'login',
-        element: (
-          <LoginPage
-            onSubmit={function (data: {
-              handle: string;
-              referenceHandle: string;
-              pin: string;
-            }): void {
-              throw new Error('Function not implemented.');
-            }}
-          />
-        ),
+        element: <LoginPage />,
       },
       {
         path: 'join',
