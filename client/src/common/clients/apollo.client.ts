@@ -5,7 +5,6 @@ const buildHeader = () => {
   const token = TokenService.getToken();
   const header = {
     authorization: `Bearer ${token}`,
-    'x-apollo-client-name': 'global',
   };
   return header;
 };
