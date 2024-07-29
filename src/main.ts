@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import * as cowsay from 'cowsay';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,5 +32,11 @@ async function bootstrap() {
   app.enableCors();
 
   await app.listen(process.env.PORT || 4001);
+
+  console.log(
+    cowsay.say({
+      text: `Blackout API is running on ${config.get('PORT')}`,
+    }),
+  );
 }
 bootstrap();
