@@ -1,10 +1,10 @@
-import { Alert, Button, Input, Paper, PinInput } from '@mantine/core';
+import { useLazyQuery } from '@apollo/client';
+import { ErrorMessage } from '@hookform/error-message';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Button, Input, Paper, PinInput } from '@mantine/core';
+import { useDebouncedCallback } from '@mantine/hooks';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { ErrorMessage } from '@hookform/error-message';
-import { useLazyQuery } from '@apollo/client';
-import { useDebouncedCallback } from '@mantine/hooks';
 import { UNIQUE_HANDLE_QUERY } from './utils/query';
 
 const LoginPage = () => {
@@ -17,6 +17,7 @@ const LoginPage = () => {
 
   const handleOnSubmit: SubmitHandler<IForm> = (data) => {
     // onSubmit(data);
+    console.log(data);
   };
 
   const debouncedState__handle = useDebouncedCallback(
