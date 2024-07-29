@@ -1,16 +1,9 @@
 import { gql } from '@apollo/client';
 
-export const JOIN_MUTATION = gql`
-  mutation Identity__join($input: JoinUserInput!) {
-    identity__join(input: $input) {
-      secret
-      handle
+export const LOGIN_MUTATION = gql`
+  mutation Identity__login($input: LoginInput!) {
+    identity__login(input: $input) {
+      token
     }
-  }
-`;
-
-export const UNIQUE_HANDLE_QUERY = gql`
-  query UniqueHandle($handle: String!) {
-    identity__getUniqueHandle(handle: $handle)
   }
 `;

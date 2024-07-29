@@ -1,14 +1,23 @@
-import { useLazyQuery } from '@apollo/client';
 import { ErrorMessage } from '@hookform/error-message';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Input, Paper, PinInput } from '@mantine/core';
-import { useDebouncedCallback } from '@mantine/hooks';
+import { Alert, Button, Input, Paper, PinInput } from '@mantine/core';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 import * as yup from 'yup';
-import { UNIQUE_HANDLE_QUERY } from './utils/query';
+import { LOGIN_MUTATION } from './utils/query';
+import { useMutation } from '@apollo/client';
+import { TokenService } from '@/common/utils/TokenService';
+import { getGqlServerError } from '@/common/utils/getGqlServerError';
 
 const LoginPage = () => {
-  const [uniqueHandleQuery] = useLazyQuery(UNIQUE_HANDLE_QUERY);
+  const [loginMutation, loginMutationState] = useMutation(LOGIN_MUTATION, {
+    onCompleted: (data) => {
+      TokenService.setToken(data?.identity__login?.token);
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
 
   const form = useForm<IForm>({
     defaultValues: {},
@@ -16,20 +25,8 @@ const LoginPage = () => {
   });
 
   const handleOnSubmit: SubmitHandler<IForm> = (data) => {
-    // onSubmit(data);
-    console.log(data);
+    loginMutation({ variables: { input: data } });
   };
-
-  const debouncedState__handle = useDebouncedCallback(
-    async (handle: string) => {
-      uniqueHandleQuery({ variables: { handle } }).then((data) => {
-        if (data.data?.identity__getUniqueHandle) {
-          form.setValue('handle', data?.data?.identity__getUniqueHandle);
-        }
-      });
-    },
-    1000,
-  );
 
   return (
     <div className="max-w-md mx-auto">
@@ -42,11 +39,11 @@ const LoginPage = () => {
           </p>
         </div>
 
-        {/* {apiError && (
+        {loginMutationState.error && (
           <Alert color="red" title="Hands up" radius="md">
-            {apiError}
+            {getGqlServerError(loginMutationState.error!)}
           </Alert>
-        )} */}
+        )}
 
         <form
           method="POST"
@@ -63,11 +60,7 @@ const LoginPage = () => {
               leftSection={<span className="text-gray-400">@</span>}
               placeholder="Type your handle"
               size="md"
-              onChange={(e) => {
-                form.setValue('handle', e.target.value);
-                debouncedState__handle(e.target.value);
-              }}
-              value={form.watch('handle')}
+              {...form.register('handle')}
             />
           </Input.Wrapper>
 
@@ -84,8 +77,19 @@ const LoginPage = () => {
             />
           </Input.Wrapper>
 
-          <Button type="submit">Login</Button>
+          <Button type="submit" loading={loginMutationState.loading}>
+            Login
+          </Button>
         </form>
+
+        <div className="mt-2">
+          <p>
+            Don't have an account?{' '}
+            <Link to="/auth/join" className="link">
+              Join now
+            </Link>
+          </p>
+        </div>
       </Paper>
     </div>
   );
@@ -95,7 +99,6 @@ export default LoginPage;
 
 const validationSchema = yup.object({
   handle: yup.string().required().label('Handle'),
-  referenceHandle: yup.string().required().label('Reference Handle'),
   pin: yup.string().required('Your pin is required').min(6).max(6).label('Pin'),
 });
 

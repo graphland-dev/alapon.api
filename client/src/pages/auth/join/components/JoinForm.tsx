@@ -1,11 +1,12 @@
-import { Alert, Button, Input, Paper, PinInput } from '@mantine/core';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { ErrorMessage } from '@hookform/error-message';
 import { useLazyQuery } from '@apollo/client';
-import { UNIQUE_HANDLE_QUERY } from '../utils/query';
+import { ErrorMessage } from '@hookform/error-message';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Alert, Button, Input, Paper, PinInput } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import * as yup from 'yup';
+import { UNIQUE_HANDLE_QUERY } from '../utils/query';
 
 interface Props {
   onSubmit: (data: IForm) => void;
@@ -111,6 +112,15 @@ const JoinForm: React.FC<Props> = ({ onSubmit, loading, apiError }) => {
             Join
           </Button>
         </form>
+
+        <div className="mt-2">
+          <p>
+            Already have an account?{' '}
+            <Link to="/auth/login" className="link">
+              Login now
+            </Link>
+          </p>
+        </div>
       </Paper>
     </div>
   );
