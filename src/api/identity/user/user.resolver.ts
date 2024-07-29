@@ -5,6 +5,11 @@ import { Args, Info, Query, Resolver } from '@nestjs/graphql';
 import * as slug from 'slug';
 import { User, UsersWithPagination } from './entities/user.entity';
 import { UserService } from './user.service';
+import { Authenticated } from '@/authorization/decorators/authenticated.decorator';
+import {
+  AuthenticatedUser,
+  IAuthUser,
+} from '@/authorization/decorators/user.decorator';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -34,6 +39,20 @@ export class UserResolver {
         where,
         getGqlFields(info, 'nodes'),
       );
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Query(() => User, {
+    name: 'identity__me',
+  })
+  @Authenticated()
+  me(@AuthenticatedUser() authUser: IAuthUser) {
+    try {
+      return this.userService.userModel.findOne({
+        _id: authUser?.sub,
+      });
     } catch (error) {
       throw new BadRequestException(error.message);
     }

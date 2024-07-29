@@ -35,7 +35,7 @@ export class User {
   @Prop()
   secret: string;
 
-  @Prop({ default: UserAccountStatus.PENDING })
+  @Prop({ default: UserAccountStatus.ACTIVE })
   @Field(() => UserAccountStatus, { nullable: true })
   accountStatus?: UserAccountStatus;
 

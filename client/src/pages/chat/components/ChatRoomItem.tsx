@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const ChatRoomItem = () => {
   return (
     <Link
-      className="flex gap-2 p-3 cursor-pointer hover:bg-zinc-100"
+      className="flex gap-2 p-3 border-b cursor-pointer hover:bg-zinc-100"
       to={'/chat/1'}
     >
       {/* <div>

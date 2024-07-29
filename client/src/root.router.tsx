@@ -1,7 +1,8 @@
-import { createHashRouter } from 'react-router-dom';
+import { createHashRouter, Outlet } from 'react-router-dom';
 import { chatRouter } from './pages/chat/chat.router';
 import HomePage from './pages/index/index.page';
 import { authRouter } from './pages/auth/auth.router';
+import { AuthGuardedWrapper } from './common/components/AuthGuardWrapper';
 
 export const AppRoute = createHashRouter([
   {
@@ -11,14 +12,11 @@ export const AppRoute = createHashRouter([
   {
     path: '/chat',
     children: chatRouter,
-    // element: <div>Room</div>,
-    // element: (
-    //   <AuthGuardedWrapper>
-    //     <TenantRouterResolverWrapper>
-    //       <Outlet />
-    //     </TenantRouterResolverWrapper>
-    //   </AuthGuardedWrapper>
-    // ),
+    element: (
+      <AuthGuardedWrapper>
+        <Outlet />
+      </AuthGuardedWrapper>
+    ),
   },
   {
     path: '/auth',

@@ -1,13 +1,13 @@
 export class TokenService {
   public static getToken(): string | null {
-    return localStorage.getItem("mini-page:accessToken");
+    return localStorage.getItem('blackout:accessToken');
   }
 
   public static setToken(token: string) {
-    localStorage.setItem("mini-page:accessToken", token);
+    localStorage.setItem('blackout:accessToken', token);
   }
 
   public static removeToken() {
-    localStorage.removeItem("mini-page:accessToken");
+    localStorage.removeItem('blackout:accessToken');
   }
 }

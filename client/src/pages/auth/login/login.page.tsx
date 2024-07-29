@@ -2,7 +2,7 @@ import { ErrorMessage } from '@hookform/error-message';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Alert, Button, Input, Paper, PinInput } from '@mantine/core';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { LOGIN_MUTATION } from './utils/query';
 import { useMutation } from '@apollo/client';
@@ -10,9 +10,11 @@ import { TokenService } from '@/common/utils/TokenService';
 import { getGqlServerError } from '@/common/utils/getGqlServerError';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [loginMutation, loginMutationState] = useMutation(LOGIN_MUTATION, {
     onCompleted: (data) => {
       TokenService.setToken(data?.identity__login?.token);
+      navigate('/chat');
     },
     onError: (error) => {
       console.log(error);
