@@ -1,23 +1,28 @@
 import { ChatRoom } from '@/common/api-models/graphql';
-import { Link } from 'react-router-dom';
+import clsx from 'clsx';
+import { Link, useParams } from 'react-router-dom';
 
 interface Props {
   room: ChatRoom;
 }
 const ChatRoomItem: React.FC<Props> = ({ room }) => {
+  const params = useParams<{ roomId: string }>();
   return (
     <Link
-      className="flex gap-2 p-3 border-b cursor-pointer hover:bg-zinc-100"
+      className={clsx(
+        'flex gap-2 p-3 border-b cursor-pointer hover:bg-zinc-100',
+        { 'bg-zinc-100': params.roomId === room._id },
+      )}
       to={`/chat/${room?._id}`}
       data-room-id={room?._id}
     >
-      <div>
+      {/* <div>
         <img
           className="w-12 h-12 rounded-full "
           src="https://avatars.githubusercontent.com/u/7611746?v=4"
           alt={room?.handle || ''}
         />
-      </div>
+      </div> */}
       <div className="flex flex-col items-start gap-1">
         <p>@{room.handle}</p>
         <p className="px-1 text-xs rounded-sm bg-primary text-primary-foreground">
