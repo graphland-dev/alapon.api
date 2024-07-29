@@ -1,6 +1,7 @@
 import { createHashRouter } from 'react-router-dom';
 import { chatRouter } from './pages/chat/chat.router';
 import HomePage from './pages/index/index.page';
+import { authRouter } from './pages/auth/auth.router';
 
 export const AppRoute = createHashRouter([
   {
@@ -18,6 +19,10 @@ export const AppRoute = createHashRouter([
     //     </TenantRouterResolverWrapper>
     //   </AuthGuardedWrapper>
     // ),
+  },
+  {
+    path: '/auth',
+    children: authRouter,
   },
   {
     path: '*',

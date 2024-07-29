@@ -28,7 +28,7 @@ const HomePage = () => {
 
       <div className="flex gap-2 my-10">
         <Link
-          to="/auth/register"
+          to="/auth/join"
           className="px-4 py-2 text-xl text-white rounded-md bg-primary"
         >
           Join

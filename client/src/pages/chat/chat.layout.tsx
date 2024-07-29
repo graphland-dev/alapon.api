@@ -3,14 +3,21 @@ import ChatSidebar from './components/ChatSidebar';
 
 const ChatLayout = () => {
   return (
-    <div className="chat-app">
-      <div className="chat-app__sidebar">
-        <ChatSidebar />
+    <>
+      {/* Desktop View */}
+      <div className="hidden h-screen md:flex">
+        <div className="w-[300px] flex-none bg-background">
+          <ChatSidebar />
+        </div>
+        <div className="flex-auto">
+          <Outlet />
+        </div>
       </div>
-      <div className="chat-app__main">
+
+      <div className="md:hidden">
         <Outlet />
       </div>
-    </div>
+    </>
   );
 };
 

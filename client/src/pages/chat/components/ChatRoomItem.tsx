@@ -13,9 +13,11 @@ const ChatRoomItem = () => {
           alt=""
         />
       </div> */}
-      <div className="flex flex-col gap-1 items-start">
+      <div className="flex flex-col items-start gap-1">
         <p>@luc_zonedddd</p>
-        <p className="bg-primary-light px-1 rounded-sm text-xs">group</p>
+        <p className="px-1 text-xs rounded-sm bg-primary text-primary-foreground">
+          group
+        </p>
         {/* <p className="text-sm text-zinc-500">Vai kemon achen???</p> */}
       </div>
     </Link>
