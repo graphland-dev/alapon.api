@@ -5,12 +5,10 @@ import { IsBoolean, IsNotEmpty } from 'class-validator';
 @InputType()
 export class CreateChatGroupInput {
   @Field(() => String)
-  @ApiProperty()
   @IsNotEmpty()
   handle: string;
 
   @Field(() => Boolean)
-  @ApiProperty()
   @IsNotEmpty()
   @IsBoolean()
   isNsfw: boolean;
@@ -19,12 +17,10 @@ export class CreateChatGroupInput {
 @InputType()
 export class AddOrRemoveGroupModeratorInput {
   @Field(() => String)
-  @ApiProperty()
   @IsNotEmpty()
   groupHandle: string;
 
   @Field(() => [String])
-  @ApiProperty()
   @IsNotEmpty()
   moderatorHandles: string[];
 }
@@ -32,12 +28,10 @@ export class AddOrRemoveGroupModeratorInput {
 @InputType()
 export class GroupMemberMutationInput {
   @Field(() => String)
-  @ApiProperty()
   @IsNotEmpty()
   groupHandle: string;
 
   @Field(() => [String])
-  @ApiProperty()
   @IsNotEmpty()
   memberHandles: string[];
 }
@@ -45,7 +39,6 @@ export class GroupMemberMutationInput {
 @InputType()
 export class JoinOrLeaveGroupInput {
   @Field(() => String)
-  @ApiProperty()
   @IsNotEmpty()
   groupHandle: string;
 }
@@ -53,7 +46,6 @@ export class JoinOrLeaveGroupInput {
 @InputType()
 export class JoinInPersonInput {
   @Field(() => String)
-  @ApiProperty()
   @IsNotEmpty()
   userHandle: string;
 }

@@ -5,7 +5,6 @@ import { IsNotEmpty } from 'class-validator';
 @ObjectType()
 export class JoinUserResponse {
   @Field(() => String)
-  @ApiProperty()
   @IsNotEmpty()
   secret: string;
 }

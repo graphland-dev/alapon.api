@@ -22,17 +22,14 @@ export class LocationReference {
 @InputType()
 export class LocationReferenceInput {
   @Field(() => Float, { nullable: true })
-  @ApiProperty()
   @IsOptional()
   lat: number;
 
   @Field(() => Float, { nullable: true })
-  @ApiProperty()
   @IsOptional()
   lng: number;
 
   @Field(() => String, { nullable: true })
-  @ApiProperty()
   @IsOptional()
   caption: string;
 }
