@@ -14,7 +14,8 @@ const ChatLayout = () => {
         </div>
       </div>
 
-      <div className="md:hidden">
+      {/* Mobile View */}
+      <div className="h-screen md:hidden">
         <Outlet />
       </div>
     </>

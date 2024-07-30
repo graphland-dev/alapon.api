@@ -3,14 +3,17 @@ import { userAtom } from '@/common/states/user.atom';
 import { useQuery } from '@apollo/client';
 import { Skeleton } from '@mantine/core';
 import { useAtomValue } from 'jotai';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import RoomMessageComposer from './_components/RoomMessageComposer';
 import RoomMessages from './_components/RoomMessages';
 import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
+import { IconChevronLeft } from '@tabler/icons-react';
+import { useRef } from 'react';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
   const authUser = useAtomValue(userAtom);
+  const messageBottomRef = useRef<HTMLDivElement>(null);
   const { data: chatRoomData, loading } = useQuery<{
     chat__chatRoom: ChatRoom;
   }>(CHAT_ROOM_DETAILS_QUERY, {
@@ -31,40 +34,53 @@ const ChatRoomPage = () => {
     <div className="flex flex-col justify-between h-full">
       {/* Top Bar */}
       <div className="px-2 py-2 bg-white h-[65px] flex-none shadow-sm">
-        <div className="flex flex-col gap-1">
-          {loading ? (
-            <>
-              <Skeleton height={20} width={200} />
-              <Skeleton height={10} width={100} />
-            </>
-          ) : (
-            <>
-              <p className="text-md">@{getHandleName()}</p>
-              {chatRoomData?.chat__chatRoom.roomType === ChatRoomType.Group ? (
-                <p className="text-xs">
-                  {chatRoomData?.chat__chatRoom?.members?.length} members
-                </p>
-              ) : (
-                <p className="text-xs">
-                  Last message sent at{' '}
-                  {new Date(
-                    chatRoomData?.chat__chatRoom.updatedAt,
-                  ).toDateString()}
-                </p>
-              )}
-            </>
-          )}
+        <div className="flex items-center gap-1">
+          <Link to={`/chat`} className="md:hidden">
+            <IconChevronLeft />
+          </Link>
+
+          <div className="flex flex-col gap-1">
+            {loading ? (
+              <>
+                <Skeleton height={20} width={200} />
+                <Skeleton height={10} width={100} />
+              </>
+            ) : (
+              <>
+                <p className="text-md">@{getHandleName()}</p>
+                {chatRoomData?.chat__chatRoom.roomType ===
+                ChatRoomType.Group ? (
+                  <p className="text-xs">
+                    {chatRoomData?.chat__chatRoom?.members?.length} members
+                  </p>
+                ) : (
+                  <p className="text-xs">
+                    Last message sent at{' '}
+                    {new Date(
+                      chatRoomData?.chat__chatRoom.updatedAt,
+                    ).toDateString()}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Chat Room Messages timeline */}
-      <div className="flex flex-col flex-auto gap-4 p-10 overflow-y-auto">
+      <div className="flex flex-col flex-auto gap-4 px-2 overflow-y-auto scroll-mt-4">
         <RoomMessages roomId={patams.roomId!} />
+        <div data-name="timeline-bottom" ref={messageBottomRef} />
       </div>
 
       {/* Input area */}
-      <div className="h-[65px] flex-none p-3 bg-slate-200">
-        <RoomMessageComposer roomId={patams.roomId!} />
+      <div className="flex-none p-2 pt-0 shadow-md">
+        <RoomMessageComposer
+          roomId={patams.roomId!}
+          onMessageSend={() => {
+            messageBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        />
       </div>
     </div>
   );

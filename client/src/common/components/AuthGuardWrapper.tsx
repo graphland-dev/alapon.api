@@ -3,9 +3,9 @@ import { ApolloError, gql, useQuery } from '@apollo/client';
 import { LoadingOverlay } from '@mantine/core';
 import { useAtom } from 'jotai';
 import React, { PropsWithChildren, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { $triggerRefetchMe } from '../rxjs-controllers';
+import { useNavigate } from 'react-router-dom';
 import { User } from '../api-models/graphql';
+import { $triggerRefetchMe } from '../rxjs-controllers';
 
 const GET_USER_QUERIES = gql`
   query GET_USER_QUERIES {

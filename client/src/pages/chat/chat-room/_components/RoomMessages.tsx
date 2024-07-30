@@ -6,7 +6,7 @@ import { socketAtom } from '@/common/states/socketAtom';
 import { gql, useLazyQuery } from '@apollo/client';
 import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
-import CharRoomMessage from './CharRoomMessage';
+import CharRoomMessage from './ChatRoomMessage';
 
 const ROOM_MESSAGES_QUERY = gql`
   query Chat__roomMessages($roomId: String!, $where: CommonPaginationOnlyDto) {
@@ -46,31 +46,33 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
       roomId: roomId,
       where: {
         sortBy: 'createdAt',
-        sort: 'ASC',
-        limit: 50,
+        sort: 'DESC',
+        limit: 100,
       },
     },
+    fetchPolicy: 'network-only',
     onCompleted: (data) => {
-      setMessages((messages) => [
-        ...messages,
-        ...data.chat__roomMessages.nodes!,
-      ]);
+      const apiReversedMessages = [...data.chat__roomMessages.nodes!].reverse();
+      setMessages((messages) => [...messages, ...apiReversedMessages]);
     },
   });
 
   useEffect(() => {
-    console.log('room-messages', roomId);
-    const handleMessage = (message: any) => {
-      console.log('Received message from socket', message);
-    };
+    console.log('room-id-changed', roomId);
     socket.emit(`join-room`, roomId);
+    if (!roomId) return;
+    const handleMessage = (message: any) => {
+      setMessages((messages) => [...messages, message]);
+    };
     socket.on(`room-messages:${roomId}`, handleMessage);
 
+    fetchRoomMessages();
     return () => {
-      socket.off(`room-messages:${roomId}`, handleMessage);
       socket.emit(`leave-room`, roomId);
+      socket.off(`room-messages:${roomId}`);
+      setMessages([]);
     };
-  }, []);
+  }, [roomId]);
 
   return (
     <>

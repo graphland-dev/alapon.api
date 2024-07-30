@@ -18,6 +18,7 @@ registerEnumType(ChatMessageType, { name: 'ChatMessageType' });
 })
 export class ChatMessage {
   @Field(() => ID)
+  @Prop({ type: mongoose.Schema.Types.ObjectId })
   _id: string;
 
   @Field(() => ChatMessageType, { nullable: true })
@@ -45,6 +46,13 @@ export class ChatMessage {
 
 export type ChatMessageDocument = HydratedDocument<ChatMessage>;
 export const ChatMessageSchema = SchemaFactory.createForClass(ChatMessage);
+
+ChatMessageSchema.pre('save', function (next) {
+  if (!this._id) {
+    this._id = new mongoose.Types.ObjectId().toString();
+  }
+  next();
+});
 
 @ObjectType()
 export class ChatMessagesWithPagination extends Paginated(ChatMessage) {}

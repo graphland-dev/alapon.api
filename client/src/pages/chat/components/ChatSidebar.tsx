@@ -1,11 +1,11 @@
 import { ChatRoomsWithPagination } from '@/common/api-models/graphql';
+import EmptyChatLottieFile from '@/common/lottie-files/empty-chat-lottie.json';
 import { userAtom } from '@/common/states/user.atom';
 import { TokenService } from '@/common/utils/TokenService';
 import { gql, useQuery } from '@apollo/client';
-import { Menu, Modal, Skeleton, UnstyledButton, Text } from '@mantine/core';
+import { Menu, Modal, Skeleton, UnstyledButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { openConfirmModal } from '@mantine/modals';
-import EmptyChatLottieFile from '@/common/lottie-files/empty-chat-lottie.json';
 import {
   IconChevronDown,
   IconDotsVertical,

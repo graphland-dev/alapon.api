@@ -1,5 +1,6 @@
 import { ChatMessageType } from '@/api/chat/chat-message/entities/chat-message.entity';
 import { Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   MessageBody,
   OnGatewayConnection,
@@ -24,7 +25,7 @@ export class SocketIoGateway
   public io: Namespace;
   private logger: Logger = new Logger('SocketGateway');
 
-  constructor() {}
+  constructor(private eventEmitter: EventEmitter2) {}
 
   handleDisconnect(client: Socket) {
     this.logger.debug(`Client disconnected: ${client.id}`);
@@ -96,17 +97,32 @@ export class SocketIoGateway
       userHandle: string;
     },
   ) {
+    const msgId = new mongoose.Types.ObjectId().toString();
+    const time = new Date().toISOString();
+
     this.io.to(data.roomId).emit(`room-messages:${data.roomId}`, {
-      _id: new mongoose.Types.ObjectId().toString(),
+      _id: msgId,
       messageType: ChatMessageType.USER_MESSAGE,
-      text: data.messageText,
       createdBy: {
-        userHandle: data.userHandle,
+        handle: data.userHandle,
         _id: data.userId,
       },
       chatRoom: {
         _id: data.roomId,
       },
+      text: data.messageText,
+      createdAt: time,
+      updatedAt: time,
+    });
+
+    this.eventEmitter.emit('message-send-to-room', {
+      _id: msgId,
+      messageType: 'USER_MESSAGE',
+      text: data.messageText,
+      createdBy: data.userId,
+      chatRoom: data.roomId,
+      createdAt: time,
+      updatedAt: time,
     });
   }
 }

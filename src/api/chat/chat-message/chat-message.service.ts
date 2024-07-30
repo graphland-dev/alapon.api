@@ -7,6 +7,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -14,9 +15,11 @@ import { Model } from 'mongoose';
 import { ChatRoomService } from '../chat-room/chat-room.service';
 import { CreateChatMessageInput } from './dto/chat-message.input';
 import { ChatMessage, ChatMessageType } from './entities/chat-message.entity';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
+  private logger: Logger = new Logger('ChatMessageService');
   constructor(
     @InjectModel(ChatMessage.name)
     public readonly chatMessageModel: Model<ChatMessage>,
@@ -93,6 +96,43 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
       {
         chatRoom: roomId,
       },
+    );
+  }
+
+  @OnEvent('message-send-to-room')
+  async handleOrderCreatedEvent(payload: any) {
+    // this.eventEmitter.emit('message-send-to-room', {
+    //   _id: msgId,
+    //   messageType: 'USER_MESSAGE',
+    //   text: data.messageText,
+    //   createdBy: data.userId,
+    //   chatRoom: data.roomId,
+    //   createdAt: time,
+    //   updatedAt: time,
+    // });
+    this.logger.debug('Storing socket message to database', payload);
+    const createdMessage = await this.chatMessageModel.create(payload);
+
+    // Update last message
+    const updatedRoom = await this.chatRoomService.chatRoomModel.updateOne(
+      { _id: payload.chatRoom },
+      {
+        $set: {
+          lastMessage: payload._id,
+          lastMessageSender: payload.createdBy,
+        },
+      },
+    );
+
+    console.log(
+      JSON.stringify(
+        {
+          createdMessage,
+          updatedRoom,
+        },
+        null,
+        2,
+      ),
     );
   }
 }

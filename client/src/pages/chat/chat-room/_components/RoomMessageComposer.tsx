@@ -1,41 +1,86 @@
 import { socketAtom } from '@/common/states/socketAtom';
 import { userAtom } from '@/common/states/user.atom';
+import { UnstyledButton } from '@mantine/core';
+import { IconSend2 } from '@tabler/icons-react';
+
 import { useAtomValue } from 'jotai';
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 
 interface Props {
   roomId: string;
+  onMessageSend?: () => void;
 }
 
-const RoomMessageComposer: React.FC<Props> = ({ roomId }) => {
+const RoomMessageComposer: React.FC<Props> = ({ roomId, onMessageSend }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const socket = useAtomValue(socketAtom);
   const authUser = useAtomValue(userAtom);
   const [message, setMessage] = React.useState('');
 
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
   const handleSendMessage = () => {
+    if (!message) return;
+
     socket.emit(`send-room-message`, {
       roomId: roomId,
-      message: message,
+      messageText: message.trim(),
       userId: authUser?._id,
       userHandle: authUser?.handle,
     });
     setMessage('');
+    onMessageSend?.();
   };
 
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setMessage(event.target.value);
+      adjustTextareaHeight();
+    },
+    [],
+  );
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      adjustTextareaHeight();
+      if (event.key === 'Enter') {
+        if (event.shiftKey || event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          setMessage((prevMessage) => prevMessage + '\n');
+          adjustTextareaHeight();
+        } else {
+          handleSendMessage();
+          event.preventDefault();
+        }
+      }
+    },
+    [message],
+  );
+
   return (
-    <div>
-      <input
-        type="text"
-        className="w-full h-full px-2 py-1 rounded-md"
+    <div className="relative">
+      <textarea
+        ref={textareaRef}
+        style={{ overflow: 'hidden', resize: 'none', height: '38px' }} // Ensure no overflow
+        className="w-full h-full px-2 py-1 focus:outline-none chat-input-shadow"
         placeholder="Type and hit enter"
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            handleSendMessage();
-          }
-        }}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
       />
+
+      <UnstyledButton
+        className="absolute right-2 top-2"
+        onClick={handleSendMessage}
+      >
+        <IconSend2 className="text-slate-500" />
+      </UnstyledButton>
     </div>
   );
 };

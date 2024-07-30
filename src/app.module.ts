@@ -11,6 +11,7 @@ import { ChatModule } from './api/chat/chat.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { SocketIoModule } from './socket.io/socket.io.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -24,8 +25,9 @@ import { SocketIoModule } from './socket.io/socket.io.module';
     // }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client/dist'),
-      exclude: ['/api/(.*)', '/graphql', '/docs'],
+      exclude: ['/api/(.*)', '/graphql'],
     }),
+    EventEmitterModule.forRoot(),
     MongooseModule.forRoot(process.env.DATABASE_URL, {
       dbName: 'offline-chat-' + process.env.NODE_ENV,
       retryDelay: 5000,

@@ -97,3 +97,18 @@
     // @apply lg:h-[calc(100vh-13rem)] h-[calc(100vh-8rem)];
   }
 }
+
+.chat-input-shadow {
+  box-shadow:
+    rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+    rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+}
+.chat-message-text {
+  a {
+    @apply text-blue-600 hover:underline;
+  }
+}
+
+.chat-message-emoji {
+  font-size: 3.2em;
+}
