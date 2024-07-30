@@ -4,7 +4,7 @@ import { UnstyledButton } from '@mantine/core';
 import { IconSend2 } from '@tabler/icons-react';
 
 import { useAtomValue } from 'jotai';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 interface Props {
   roomId: string;

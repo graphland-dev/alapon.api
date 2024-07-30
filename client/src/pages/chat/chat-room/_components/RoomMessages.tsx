@@ -7,7 +7,6 @@ import { gql, useLazyQuery } from '@apollo/client';
 import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
 import CharRoomMessage from './ChatRoomMessage';
-import { userAtom } from '@/common/states/user.atom';
 
 const ROOM_MESSAGES_QUERY = gql`
   query Chat__roomMessages($roomId: String!, $where: CommonPaginationOnlyDto) {
