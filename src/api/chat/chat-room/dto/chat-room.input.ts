@@ -47,4 +47,8 @@ export class JoinInPersonInput {
   @Field(() => String)
   @IsNotEmpty()
   userHandle: string;
+
+  @Field(() => String)
+  @IsNotEmpty()
+  messageText: string;
 }

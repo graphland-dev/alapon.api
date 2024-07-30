@@ -61,6 +61,14 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
       messageType: ChatMessageType.SYSTEM_MESSAGE,
     });
 
+    // Send initial message to room
+    await this.chatMessageService.sendMessageToRoom({
+      text: input?.messageText,
+      roomId: res._id,
+      messageType: ChatMessageType.USER_MESSAGE,
+      userId: authUser?.sub,
+    });
+
     return res;
   }
 

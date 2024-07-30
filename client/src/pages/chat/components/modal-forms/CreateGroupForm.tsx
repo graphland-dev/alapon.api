@@ -1,11 +1,12 @@
-import { SubmitHandler, useForm } from 'react-hook-form';
-import * as yup from 'yup';
+import { getGqlServerError } from '@/common/utils/getGqlServerError';
+import { gql, useMutation } from '@apollo/client';
+import { ErrorMessage } from '@hookform/error-message';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Alert, Button, Input, Switch, Text, Title } from '@mantine/core';
-import { gql, useLazyQuery, useMutation } from '@apollo/client';
-import { getGqlServerError } from '@/common/utils/getGqlServerError';
-import { ErrorMessage } from '@hookform/error-message';
 import { useDebouncedCallback } from '@mantine/hooks';
+import { IconAt } from '@tabler/icons-react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import * as yup from 'yup';
 
 const CREATE_GROUP_MUTATION = gql`
   mutation Chat__createChatGroup($input: CreateChatGroupInput!) {
@@ -79,6 +80,7 @@ const CreateGroupForm: React.FC<Props> = ({ onComplete }) => {
       >
         <Input
           size="lg"
+          leftSection={<IconAt size={16} />}
           placeholder="Type group Handle"
           onChange={(e) => {
             form.setValue('handle', e.target.value);
