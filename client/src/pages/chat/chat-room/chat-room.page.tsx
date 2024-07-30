@@ -68,7 +68,7 @@ const ChatRoomPage = () => {
       </div>
 
       {/* Chat Room Messages timeline */}
-      <div className="flex flex-col flex-auto gap-4 px-2 overflow-y-auto scroll-mt-4">
+      <div className="flex flex-col flex-auto gap-2 px-2 overflow-y-auto">
         <RoomMessages roomId={patams.roomId!} />
         <div data-name="timeline-bottom" ref={messageBottomRef} />
       </div>

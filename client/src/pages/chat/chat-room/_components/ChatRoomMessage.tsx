@@ -14,7 +14,13 @@ const CharRoomMessage: React.FC<Props> = ({ message }) => {
   switch (message?.messageType) {
     case ChatMessageType.SystemMessage:
       return (
-        <p className="text-sm italic text-center text-slate-600">
+        <p
+          data-message-id={message?._id}
+          data-user-id={message?.createdBy?._id}
+          data-room-id={message?.chatRoom?._id}
+          data-message-type={message?.messageType}
+          className="text-sm italic text-center text-slate-600"
+        >
           {message?.text}
         </p>
       );
@@ -24,27 +30,29 @@ const CharRoomMessage: React.FC<Props> = ({ message }) => {
           data-message-id={message?._id}
           data-user-id={message?.createdBy?._id}
           data-room-id={message?.chatRoom?._id}
-          className={clsx('flex', {
-            'justify-end': message?.createdBy?._id === authUser?._id,
+          data-message-type={message?.messageType}
+          className={clsx('chat-message-bubble', {
+            'chat-message-bubble--oposition':
+              message?.createdBy?._id !== authUser?._id,
+            'chat-message-bubble--self':
+              message?.createdBy?._id == authUser?._id,
           })}
         >
-          <div
-            className={clsx('p-2 rounded-md max-w-[80%]', {
-              'bg-white': message?.createdBy?._id !== authUser?._id,
-              'bg-primary text-primary-foreground':
-                message?.createdBy?._id == authUser?._id,
-            })}
-          >
-            <p className="text-xs font-semibold">
+          {message?.createdBy?._id !== authUser?._id && (
+            <p className="chat-message-bubble__user-handle">
               @{message?.createdBy?.handle}
             </p>
-            <div
-              className="whitespace-pre-wrap chat-message-text"
-              dangerouslySetInnerHTML={{
-                __html: formatChatText(message?.text || ''),
-              }}
-            ></div>
-          </div>
+          )}
+
+          <div
+            className="chat-message-bubble__content"
+            dangerouslySetInnerHTML={{
+              __html: formatChatText(message?.text || ''),
+            }}
+          />
+          <p className="chat-message-bubble__time">
+            {new Date(message?.createdAt).toLocaleTimeString()}
+          </p>
         </div>
       );
   }
