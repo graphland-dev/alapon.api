@@ -24,7 +24,7 @@ import { SocketIoModule } from './socket.io/socket.io.module';
     // }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client/dist'),
-      exclude: ['/api/(.*)', '/graphql'],
+      exclude: ['/api/(.*)', '/graphql', '/docs'],
     }),
     MongooseModule.forRoot(process.env.DATABASE_URL, {
       dbName: 'offline-chat-' + process.env.NODE_ENV,

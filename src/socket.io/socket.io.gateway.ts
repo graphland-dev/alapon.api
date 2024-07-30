@@ -23,7 +23,6 @@ export class SocketIoGateway
   @WebSocketServer()
   public io: Namespace;
   private logger: Logger = new Logger('SocketGateway');
-  connectedClients = new Map<string, string[]>();
 
   constructor() {}
 
@@ -43,6 +42,7 @@ export class SocketIoGateway
   @SubscribeMessage('join-room')
   handleJoinRoom(client: Socket, roomId: string): void {
     client.join(roomId);
+    this.io.to(roomId).emit('room-online-count', this.io.sockets.size);
     console.log(`Client ${client.id} joined room: ${roomId}`);
   }
 
@@ -50,6 +50,13 @@ export class SocketIoGateway
   handleLeaveRoom(client: Socket, roomId: string): void {
     client.leave(roomId);
     console.log(`Client ${client.id} left room: ${roomId}`);
+  }
+
+  sendUserCount(roomId: string): void {
+    console.log(roomId);
+    // TODO: fix this
+    // const userCount = room ? room.size : 0; // Get the size of the Set
+    // console.log(`Room ${roomId} has ${userCount} users`);
   }
 
   async sendMessageToSocketClients(
