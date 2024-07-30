@@ -26,6 +26,12 @@ const MY_CHAT_ROOMS_QUERY = gql`
         members {
           handle
         }
+        lastMessage {
+          text
+        }
+        lastMessageSender {
+          handle
+        }
         isNsfw
         roomType
       }

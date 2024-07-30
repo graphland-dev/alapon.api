@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -51,6 +52,8 @@ export type ChatRoom = {
   handle?: Maybe<Scalars['String']['output']>;
   isNsfw: Scalars['Boolean']['output'];
   kickedUsers?: Maybe<Array<User>>;
+  lastMessage?: Maybe<ChatMessage>;
+  lastMessageSender?: Maybe<User>;
   members?: Maybe<Array<User>>;
   moderators?: Maybe<Array<User>>;
   owner?: Maybe<User>;
@@ -100,7 +103,7 @@ export type CommonPaginationOnlyDto = {
 
 export type CreateChatGroupInput = {
   handle: Scalars['String']['input'];
-  isNsfw: Scalars['Boolean']['input'];
+  isNsfw?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type GroupMemberMutationInput = {
@@ -109,6 +112,7 @@ export type GroupMemberMutationInput = {
 };
 
 export type JoinInPersonInput = {
+  messageText: Scalars['String']['input'];
   userHandle: Scalars['String']['input'];
 };
 
@@ -270,6 +274,7 @@ export type Query = {
   __typename?: 'Query';
   chat__myChatRooms: ChatRoomsWithPagination;
   identity__getUniqueHandle: Scalars['String']['output'];
+  identity__me: User;
   identity__myReferenceApprovalRequests: ReferenceRequestsWithPagination;
   identity__referenceRequests: ReferenceRequestsWithPagination;
   identity__users: UsersWithPagination;
@@ -375,3 +380,51 @@ export enum Where_Operator {
   And = 'and',
   Or = 'or'
 }
+
+export type Get_User_QueriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type Get_User_QueriesQuery = { __typename?: 'Query', identity__me: { __typename?: 'User', _id: string, handle: string, referenceHandle?: string | null, accountStatus?: UserAccountStatus | null, lastLoginAt?: any | null, createdAt?: any | null, updatedAt?: any | null } };
+
+export type Chat__MyChatRoomsQueryVariables = Exact<{
+  where?: InputMaybe<CommonPaginationOnlyDto>;
+}>;
+
+
+export type Chat__MyChatRoomsQuery = { __typename?: 'Query', chat__myChatRooms: { __typename?: 'ChatRoomsWithPagination', nodes?: Array<{ __typename?: 'ChatRoom', _id: string, handle?: string | null, isNsfw: boolean, roomType: ChatRoomType, members?: Array<{ __typename?: 'User', handle: string }> | null, lastMessage?: { __typename?: 'ChatMessage', text?: string | null } | null, lastMessageSender?: { __typename?: 'User', handle: string } | null }> | null } };
+
+export type Chat__CreateChatGroupMutationVariables = Exact<{
+  input: CreateChatGroupInput;
+}>;
+
+
+export type Chat__CreateChatGroupMutation = { __typename?: 'Mutation', chat__createChatGroup: { __typename?: 'CommonMutationResponse', _id: string } };
+
+export type Chat__GetUniqueGroupHandleMutationVariables = Exact<{
+  handle: Scalars['String']['input'];
+}>;
+
+
+export type Chat__GetUniqueGroupHandleMutation = { __typename?: 'Mutation', chat__getUniqueRoomHandle: string };
+
+export type Chat__JoinGroupMutationVariables = Exact<{
+  input: JoinOrLeaveGroupInput;
+}>;
+
+
+export type Chat__JoinGroupMutation = { __typename?: 'Mutation', chat__joinGroup: boolean };
+
+export type Chat__JoinInPersonMutationVariables = Exact<{
+  input: JoinInPersonInput;
+}>;
+
+
+export type Chat__JoinInPersonMutation = { __typename?: 'Mutation', chat__joinInPerson: { __typename?: 'CommonMutationResponse', _id: string } };
+
+
+export const Get_User_QueriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GET_USER_QUERIES"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"identity__me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"handle"}},{"kind":"Field","name":{"kind":"Name","value":"referenceHandle"}},{"kind":"Field","name":{"kind":"Name","value":"accountStatus"}},{"kind":"Field","name":{"kind":"Name","value":"lastLoginAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<Get_User_QueriesQuery, Get_User_QueriesQueryVariables>;
+export const Chat__MyChatRoomsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Chat__myChatRooms"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"CommonPaginationOnlyDto"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chat__myChatRooms"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}},{"kind":"Field","name":{"kind":"Name","value":"handle"}},{"kind":"Field","name":{"kind":"Name","value":"members"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"handle"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lastMessage"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"text"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lastMessageSender"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"handle"}}]}},{"kind":"Field","name":{"kind":"Name","value":"isNsfw"}},{"kind":"Field","name":{"kind":"Name","value":"roomType"}}]}}]}}]}}]} as unknown as DocumentNode<Chat__MyChatRoomsQuery, Chat__MyChatRoomsQueryVariables>;
+export const Chat__CreateChatGroupDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Chat__createChatGroup"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateChatGroupInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chat__createChatGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}}]}}]}}]} as unknown as DocumentNode<Chat__CreateChatGroupMutation, Chat__CreateChatGroupMutationVariables>;
+export const Chat__GetUniqueGroupHandleDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Chat__getUniqueGroupHandle"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"handle"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chat__getUniqueRoomHandle"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"handle"},"value":{"kind":"Variable","name":{"kind":"Name","value":"handle"}}}]}]}}]} as unknown as DocumentNode<Chat__GetUniqueGroupHandleMutation, Chat__GetUniqueGroupHandleMutationVariables>;
+export const Chat__JoinGroupDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Chat__joinGroup"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"JoinOrLeaveGroupInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chat__joinGroup"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<Chat__JoinGroupMutation, Chat__JoinGroupMutationVariables>;
+export const Chat__JoinInPersonDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Chat__joinInPerson"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"JoinInPersonInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"chat__joinInPerson"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"_id"}}]}}]}}]} as unknown as DocumentNode<Chat__JoinInPersonMutation, Chat__JoinInPersonMutationVariables>;

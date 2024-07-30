@@ -37,10 +37,17 @@ const ChatRoomItem: React.FC<Props> = ({ room }) => {
       </div> */}
       <div className="flex flex-col items-start gap-1">
         <p>@{getHandleName()}</p>
-        <p className="px-1 text-xs rounded-sm bg-primary text-primary-foreground">
-          {room.roomType}
-        </p>
-        {/* <p className="text-sm text-zinc-500">Vai kemon achen???</p> */}
+        {room.roomType === ChatRoomType.Group && (
+          <p className="px-1 text-xs rounded-sm bg-primary text-primary-foreground">
+            {room.roomType}
+          </p>
+        )}
+        {room.lastMessage && (
+          <p className="text-xs truncate text-zinc-500">
+            {room.lastMessageSender && <b>{room.lastMessageSender?.handle}:</b>}
+            {room.lastMessage?.text}
+          </p>
+        )}
       </div>
     </Link>
   );
