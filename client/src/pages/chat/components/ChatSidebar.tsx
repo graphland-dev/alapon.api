@@ -1,10 +1,10 @@
 import { ChatRoomsWithPagination } from '@/common/api-models/graphql';
-import { gql, useQuery } from '@apollo/client';
-import { Menu, Skeleton } from '@mantine/core';
-import ChatRoomItem from './ChatRoomItem';
-import { useAtomValue } from 'jotai';
 import { userAtom } from '@/common/states/user.atom';
-import { IconDotsVertical, IconPlus } from '@tabler/icons-react';
+import { gql, useQuery } from '@apollo/client';
+import { Menu, Skeleton, UnstyledButton } from '@mantine/core';
+import { IconChevronDown, IconPlus } from '@tabler/icons-react';
+import { useAtomValue } from 'jotai';
+import ChatRoomItem from './ChatRoomItem';
 
 const MY_CHAT_ROOMS_QUERY = gql`
   query Chat__myChatRooms($where: CommonPaginationOnlyDto) {
@@ -12,6 +12,9 @@ const MY_CHAT_ROOMS_QUERY = gql`
       nodes {
         _id
         handle
+        members {
+          handle
+        }
         isNsfw
         roomType
       }
@@ -27,8 +30,19 @@ const ChatSidebar = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="h-[65px] flex-none flex items-center gap-2 px-2 justify-between">
-        <p>@{authUser?.handle}</p>
+      <div className="h-[40px] flex-none flex items-center gap-2 px-2 justify-between font-mono bg-primary text-primary-foreground">
+        <Menu>
+          <Menu.Target>
+            <UnstyledButton className="flex items-center gap-1">
+              <p>@{authUser?.handle}</p>
+              <IconChevronDown size={15} />
+            </UnstyledButton>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            <Menu.Item>Logout</Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
 
         <Menu>
           <Menu.Target>

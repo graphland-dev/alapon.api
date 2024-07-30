@@ -1,5 +1,7 @@
-import { ChatRoom } from '@/common/api-models/graphql';
+import { ChatRoom, ChatRoomType } from '@/common/api-models/graphql';
+import { userAtom } from '@/common/states/user.atom';
 import clsx from 'clsx';
+import { useAtomValue } from 'jotai';
 import { Link, useParams } from 'react-router-dom';
 
 interface Props {
@@ -7,6 +9,16 @@ interface Props {
 }
 const ChatRoomItem: React.FC<Props> = ({ room }) => {
   const params = useParams<{ roomId: string }>();
+  const authUser = useAtomValue(userAtom);
+
+  const getHandleName = () => {
+    if (room.roomType === ChatRoomType.Group) {
+      return room.handle;
+    }
+    return room.members!.find((member) => member.handle !== authUser?.handle)
+      ?.handle;
+  };
+
   return (
     <Link
       className={clsx(
@@ -24,7 +36,7 @@ const ChatRoomItem: React.FC<Props> = ({ room }) => {
         />
       </div> */}
       <div className="flex flex-col items-start gap-1">
-        <p>@{room.handle}</p>
+        <p>@{getHandleName()}</p>
         <p className="px-1 text-xs rounded-sm bg-primary text-primary-foreground">
           {room.roomType}
         </p>
