@@ -4,7 +4,7 @@ import {
 } from '@/authorization/decorators/user.decorator';
 import { CommonMutationResponse } from '@/common/reference-models/common-mutation.entity';
 import { BadRequestException } from '@nestjs/common';
-import { Args, Info, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Info, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ChatMessageService } from './chat-message.service';
 import { SendMessageToRoomInput } from './dto/chat-message.input';
 import {
@@ -39,7 +39,7 @@ export class ChatMessageResolver {
     }
   }
 
-  @Mutation(() => ChatMessagesWithPagination, {
+  @Query(() => ChatMessagesWithPagination, {
     name: 'chat__roomMessages',
     description: '🔐 Autneticated',
   })

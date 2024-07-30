@@ -33,7 +33,7 @@ export class ChatMessage {
   createdBy: string;
 
   @Field(() => ChatRoom, { nullable: true })
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: ChatRoom.name })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ChatRoom' })
   chatRoom: string;
 
   @Field(() => Date, { nullable: true })

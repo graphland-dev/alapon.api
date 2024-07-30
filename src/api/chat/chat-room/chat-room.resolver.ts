@@ -6,6 +6,7 @@ import {
 import { CommonPaginationOnlyDto } from '@/common/dto/CommonPaginationDto';
 import { CommonMutationResponse } from '@/common/reference-models/common-mutation.entity';
 import getGqlFields from '@/common/utils/gql-fields';
+import { getRandomCharacters } from '@/common/utils/random-code';
 import { slugify } from '@/common/utils/slug';
 import { BadRequestException } from '@nestjs/common';
 import { Args, Info, Mutation, Query, Resolver } from '@nestjs/graphql';
@@ -18,7 +19,6 @@ import {
   JoinOrLeaveGroupInput,
 } from './dto/chat-room.input';
 import { ChatRoom, ChatRoomsWithPagination } from './entities/chat-room.entity';
-import { getRandomCharacters } from '@/common/utils/random-code';
 
 @Resolver(() => ChatRoom)
 export class ChatRoomResolver {
@@ -38,6 +38,26 @@ export class ChatRoomResolver {
         where,
         getGqlFields(info, 'nodes'),
         user,
+      );
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Query(() => ChatRoom, {
+    name: 'chat__chatRoom',
+  })
+  @Authenticated()
+  roomDetails(
+    @Args('roomId') roomId: string,
+    @Info() info: any,
+    @AuthenticatedUser() authUser: IAuthUser,
+  ) {
+    try {
+      return this.chatRoomService.roomDetails(
+        roomId,
+        getGqlFields(info),
+        authUser,
       );
     } catch (error) {
       throw new BadRequestException(error.message);

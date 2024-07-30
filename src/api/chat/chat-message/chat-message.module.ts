@@ -9,7 +9,7 @@ import { SocketIoModule } from '@/socket.io/socket.io.module';
 @Module({
   imports: [
     forwardRef(() => ChatRoomModule),
-    SocketIoModule,
+    forwardRef(() => SocketIoModule),
     MongooseModule.forFeature([
       { name: ChatMessage.name, schema: ChatMessageSchema },
     ]),

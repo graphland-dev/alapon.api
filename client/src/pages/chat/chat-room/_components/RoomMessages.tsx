@@ -1,6 +1,12 @@
-import { gql, useQuery } from '@apollo/client';
+import {
+  ChatMessage,
+  ChatMessagesWithPagination,
+} from '@/common/api-models/graphql';
+import { socketAtom } from '@/common/states/socketAtom';
+import { gql, useLazyQuery } from '@apollo/client';
+import { useAtomValue } from 'jotai';
+import { useEffect, useState } from 'react';
 import CharRoomMessage from './CharRoomMessage';
-import { ChatMessagesWithPagination } from '@/common/api-models/graphql';
 
 const ROOM_MESSAGES_QUERY = gql`
   query Chat__roomMessages($roomId: String!, $where: CommonPaginationOnlyDto) {
@@ -29,7 +35,11 @@ interface Props {
 }
 
 const RoomMessages: React.FC<Props> = ({ roomId }) => {
-  const { data, loading } = useQuery<{
+  // console.log('Rendering RoomMessages');
+  const socket = useAtomValue(socketAtom);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  const [fetchRoomMessages] = useLazyQuery<{
     chat__roomMessages: ChatMessagesWithPagination;
   }>(ROOM_MESSAGES_QUERY, {
     variables: {
@@ -37,16 +47,35 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
       where: {
         sortBy: 'createdAt',
         sort: 'ASC',
-        limit: -1,
+        limit: 50,
       },
     },
-    skip: roomId === undefined,
+    onCompleted: (data) => {
+      setMessages((messages) => [
+        ...messages,
+        ...data.chat__roomMessages.nodes!,
+      ]);
+    },
   });
+
+  useEffect(() => {
+    console.log('room-messages', roomId);
+    const handleMessage = (message: any) => {
+      console.log('Received message from socket', message);
+    };
+    socket.emit(`join-room`, roomId);
+    socket.on(`room-messages:${roomId}`, handleMessage);
+
+    return () => {
+      socket.off(`room-messages:${roomId}`, handleMessage);
+      socket.emit(`leave-room`, roomId);
+    };
+  }, []);
 
   return (
     <>
-      {data?.chat__roomMessages.nodes!.map((message) => (
-        <CharRoomMessage key={message._id} message={message} />
+      {messages!.map((message) => (
+        <CharRoomMessage message={message} key={message?._id} />
       ))}
     </>
   );

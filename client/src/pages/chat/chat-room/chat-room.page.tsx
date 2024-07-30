@@ -1,12 +1,12 @@
-import { useQuery } from '@apollo/client';
-import CharRoomMessage from './_components/CharRoomMessage';
-import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
-import { useParams } from 'react-router-dom';
 import { ChatRoom, ChatRoomType } from '@/common/api-models/graphql';
+import { userAtom } from '@/common/states/user.atom';
+import { useQuery } from '@apollo/client';
 import { Skeleton } from '@mantine/core';
 import { useAtomValue } from 'jotai';
-import { userAtom } from '@/common/states/user.atom';
+import { useParams } from 'react-router-dom';
+import RoomMessageComposer from './_components/RoomMessageComposer';
 import RoomMessages from './_components/RoomMessages';
+import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
@@ -64,11 +64,7 @@ const ChatRoomPage = () => {
 
       {/* Input area */}
       <div className="h-[65px] flex-none p-3 bg-slate-200">
-        <input
-          type="text"
-          className="w-full h-full px-2 py-1 rounded-md"
-          placeholder="Type and hit enter"
-        />
+        <RoomMessageComposer roomId={patams.roomId!} />
       </div>
     </div>
   );

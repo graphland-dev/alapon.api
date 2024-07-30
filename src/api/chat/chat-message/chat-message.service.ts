@@ -1,4 +1,7 @@
+import { IAuthUser } from '@/authorization/decorators/user.decorator';
 import { BaseDatabaseRepository } from '@/common/database/BaseDatabaseRepository';
+import { CommonPaginationOnlyDto } from '@/common/dto/CommonPaginationDto';
+import { SocketIoGateway } from '@/socket.io/socket.io.gateway';
 import {
   ForbiddenException,
   forwardRef,
@@ -8,12 +11,9 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ChatRoomService } from '../chat-room/chat-room.service';
 import { CreateChatMessageInput } from './dto/chat-message.input';
 import { ChatMessage, ChatMessageType } from './entities/chat-message.entity';
-import { ChatRoomService } from '../chat-room/chat-room.service';
-import { IAuthUser } from '@/authorization/decorators/user.decorator';
-import { CommonPaginationOnlyDto } from '@/common/dto/CommonPaginationDto';
-import { SocketIoGateway } from '@/socket.io/socket.io.gateway';
 
 @Injectable()
 export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
@@ -43,8 +43,18 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
       messageType: input?.messageType || ChatMessageType.USER_MESSAGE,
     });
 
-    // Send message to socket channel
+    // Update last message
+    await this.chatRoomService.chatRoomModel.updateOne(
+      { _id: input.roomId },
+      {
+        $set: {
+          lastMessage: message._id,
+          lastMessageSender: input?.userId,
+        },
+      },
+    );
 
+    // Send message to socket channel
     await this.socketIoGateway.broadCastMessage(
       `room-messages:${input.roomId}`,
       JSON.stringify(message),

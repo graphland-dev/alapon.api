@@ -1,10 +1,14 @@
+import { ChatMessageType } from '@/api/chat/chat-message/entities/chat-message.entity';
 import { Logger } from '@nestjs/common';
 import {
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import mongoose from 'mongoose';
 import { Namespace, Socket } from 'socket.io';
 
 @WebSocketGateway({
@@ -23,6 +27,11 @@ export class SocketIoGateway
 
   constructor() {}
 
+  handleDisconnect(client: Socket) {
+    this.logger.debug(`Client disconnected: ${client.id}`);
+    this.logger.debug(`Client connected: ${this.io.sockets.size}`);
+  }
+
   async handleConnection(client: Socket) {
     // const token = client.handshake?.headers?.token as string;
     // const decoded = jwt.decode(token) as IAuthUser;
@@ -31,31 +40,17 @@ export class SocketIoGateway
     this.logger.debug(`Client connected: ${this.io.sockets.size}`);
   }
 
-  async handleDisconnect(client: Socket) {
-    this.logger.debug(`Client disconnected: ${client.id}`);
-    this.logger.debug(`Client connected: ${this.io.sockets.size}`);
+  @SubscribeMessage('join-room')
+  handleJoinRoom(client: Socket, roomId: string): void {
+    client.join(roomId);
+    console.log(`Client ${client.id} joined room: ${roomId}`);
   }
 
-  // @SubscribeMessage('join-room')
-  // async handleJoinRoom(
-  //   @MessageBody() data: { roomId: string; userId: string },
-  // ) {
-  //   this.io.socketsJoin(data.roomId);
-  //   this.logger.debug(`User joined room: ${data.roomId}`);
-  // }
-
-  // @SubscribeMessage('leave-room')
-  // async handleLeaveRoom(
-  //   @MessageBody() data: { roomId: string; userId: string },
-  // ) {
-  //   this.io.socketsLeave(data.roomId);
-  //   this.logger.debug(`User left room: ${data.roomId}`);
-  // }
-
-  // handleEvent(@MessageBody() data: unknown): WsResponse<unknown> {
-  //   const event = 'events';
-  //   return { event, data };
-  // }
+  @SubscribeMessage('leave-room')
+  handleLeaveRoom(client: Socket, roomId: string): void {
+    client.leave(roomId);
+    console.log(`Client ${client.id} left room: ${roomId}`);
+  }
 
   async sendMessageToSocketClients(
     clientIds: string[],
@@ -82,5 +77,29 @@ export class SocketIoGateway
       }),
     );
     return this.io.emit(eventName, data);
+  }
+
+  @SubscribeMessage('send-room-message')
+  async getRoomMessageFromClient(
+    @MessageBody()
+    data: {
+      roomId: string;
+      userId: string;
+      messageText: string;
+      userHandle: string;
+    },
+  ) {
+    this.io.to(data.roomId).emit(`room-messages:${data.roomId}`, {
+      _id: new mongoose.Types.ObjectId().toString(),
+      messageType: ChatMessageType.USER_MESSAGE,
+      text: data.messageText,
+      createdBy: {
+        userHandle: data.userHandle,
+        _id: data.userId,
+      },
+      chatRoom: {
+        _id: data.roomId,
+      },
+    });
   }
 }

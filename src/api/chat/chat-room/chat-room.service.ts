@@ -13,6 +13,8 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ChatMessageService } from '../chat-message/chat-message.service';
+import { ChatMessageType } from '../chat-message/entities/chat-message.entity';
 import {
   AddOrRemoveGroupModeratorInput,
   CreateChatGroupInput,
@@ -21,8 +23,6 @@ import {
   JoinOrLeaveGroupInput,
 } from './dto/chat-room.input';
 import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
-import { ChatMessageService } from '../chat-message/chat-message.service';
-import { ChatMessageType } from '../chat-message/entities/chat-message.entity';
 
 @Injectable()
 export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
@@ -44,8 +44,9 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
 
     const _room = await this.chatRoomModel.findOne({
       roomType: ChatRoomType.PRIVATE,
-      members: { $in: [_user._id, authUser.sub] },
+      members: { $all: [_user._id, authUser.sub] },
     });
+    console.log(_room);
     if (_room) throw new BadRequestException('You are already connected');
 
     const res = await this.chatRoomModel.create({
@@ -81,11 +82,33 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
         { path: 'moderators' },
         { path: 'owner' },
         { path: 'kickedUsers' },
+        { path: 'lastMessage' },
+        { path: 'lastMessageSender' },
       ],
       {
         members: { $in: [user?.sub] },
       },
     );
+  }
+
+  async roomDetails(roomId: string, fields: string[], authUser: IAuthUser) {
+    // TODO: show chat room details with count of members
+    const _room = this.chatRoomModel.findOne({
+      _id: roomId,
+      members: { $in: [authUser.sub] },
+    });
+
+    if (fields.length) {
+      fields.forEach((field) => {
+        _room.populate(field);
+      });
+      _room.select(fields.join(' '));
+    }
+
+    if (!_room)
+      throw new BadRequestException(`Room not found or permission denied`);
+
+    return await _room.exec();
   }
 
   async createGroup(input: CreateChatGroupInput, user: IAuthUser) {

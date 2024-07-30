@@ -26,7 +26,7 @@ export class AuthService {
   async loginUser(input: LoginInput) {
     // check if user exists
     const user = await this.userService.userModel.findOne({
-      handle: input.handle,
+      handle: slugify(input.handle),
     });
     if (!user) {
       throw new NotFoundException('User not found');
