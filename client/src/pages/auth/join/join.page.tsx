@@ -66,7 +66,7 @@ const JoinPage = () => {
               </Button>
 
               <Link to={'/auth/login'} className="link">
-                Logi now
+                Login now
               </Link>
             </div>
           </div>
