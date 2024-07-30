@@ -10,6 +10,7 @@ import {
   AuthenticatedUser,
   IAuthUser,
 } from '@/authorization/decorators/user.decorator';
+import { getRandomCharacters } from '@/common/utils/random-code';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -21,10 +22,9 @@ export class UserResolver {
       handle: slug(handle, '_'),
     });
 
-    const _random3Digits = Math.floor(Math.random() * 1000);
-    const _randomNumber = _count > 0 ? _random3Digits + _count : _random3Digits;
-
-    return _count ? slug(handle, '_') + '_' + _randomNumber : slug(handle, '_');
+    return _count
+      ? slug(handle, '_') + '_' + getRandomCharacters(4)
+      : slug(handle, '_');
   }
 
   @Query(() => UsersWithPagination, {

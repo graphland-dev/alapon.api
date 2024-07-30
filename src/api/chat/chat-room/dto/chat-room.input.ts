@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
 
 @InputType()
 export class CreateChatGroupInput {
@@ -7,8 +7,8 @@ export class CreateChatGroupInput {
   @IsNotEmpty()
   handle: string;
 
-  @Field(() => Boolean)
-  @IsNotEmpty()
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
   @IsBoolean()
   isNsfw: boolean;
 }

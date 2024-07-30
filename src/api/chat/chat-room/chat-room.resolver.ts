@@ -18,6 +18,7 @@ import {
   JoinOrLeaveGroupInput,
 } from './dto/chat-room.input';
 import { ChatRoom, ChatRoomsWithPagination } from './entities/chat-room.entity';
+import { getRandomCharacters } from '@/common/utils/random-code';
 
 @Resolver(() => ChatRoom)
 export class ChatRoomResolver {
@@ -73,7 +74,7 @@ export class ChatRoomResolver {
         });
 
       return _handleRoomCount > 0
-        ? slugify(handle) + '_' + _handleRoomCount
+        ? slugify(handle) + '_' + getRandomCharacters(4)
         : slugify(handle);
     } catch (error) {
       throw new BadRequestException(error.message);
