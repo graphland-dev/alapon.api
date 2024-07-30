@@ -2,7 +2,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Alert, Button, Input, Switch, Text, Title } from '@mantine/core';
-import { gql, useMutation } from '@apollo/client';
+import { gql, useLazyQuery, useMutation } from '@apollo/client';
 import { getGqlServerError } from '@/common/utils/getGqlServerError';
 import { ErrorMessage } from '@hookform/error-message';
 import { useDebouncedCallback } from '@mantine/hooks';
@@ -15,6 +15,12 @@ const CREATE_GROUP_MUTATION = gql`
   }
 `;
 
+const UNIQUE_HANDLE_MUTATION = gql`
+  mutation Chat__getUniqueGroupHandle($handle: String!) {
+    chat__getUniqueRoomHandle(handle: $handle)
+  }
+`;
+
 interface Props {
   onComplete?: () => void;
 }
@@ -23,19 +29,21 @@ const CreateGroupForm: React.FC<Props> = ({ onComplete }) => {
     resolver: yupResolver(validationSchema),
   });
 
+  const [createGroupMutation, createGroupMutationState] = useMutation(
+    CREATE_GROUP_MUTATION,
+  );
+
+  const [uniqueHandleMutation] = useMutation(UNIQUE_HANDLE_MUTATION);
+
   const debouncedState__handle = useDebouncedCallback(
     async (handle: string) => {
-      uniqueHandleQuery({ variables: { handle } }).then((data) => {
-        if (data.data?.identity__getUniqueHandle) {
-          form.setValue('handle', data?.data?.identity__getUniqueHandle);
+      uniqueHandleMutation({ variables: { handle } }).then((data) => {
+        if (data.data?.chat__getUniqueRoomHandle) {
+          form.setValue('handle', data?.data?.chat__getUniqueRoomHandle);
         }
       });
     },
     1000,
-  );
-
-  const [createGroupMutation, createGroupMutationState] = useMutation(
-    CREATE_GROUP_MUTATION,
   );
 
   const handleOnSubmit: SubmitHandler<IForm> = (data) => {
@@ -71,14 +79,18 @@ const CreateGroupForm: React.FC<Props> = ({ onComplete }) => {
       >
         <Input
           size="lg"
-          {...form.register('handle')}
           placeholder="Type group Handle"
+          onChange={(e) => {
+            form.setValue('handle', e.target.value);
+            debouncedState__handle(e.target.value);
+          }}
+          value={form.watch('handle')}
         />
       </Input.Wrapper>
 
       <div className="flex items-center gap-2">
         <Text>NSFW allowd?</Text>
-        <Switch onChange={console.log} />
+        <Switch {...form.register('isNsfw')} />
       </div>
 
       <Button
