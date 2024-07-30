@@ -2,12 +2,19 @@ import { createHashRouter, Outlet } from 'react-router-dom';
 import { chatRouter } from './pages/chat/chat.router';
 import HomePage from './pages/index/index.page';
 import { authRouter } from './pages/auth/auth.router';
-import { AuthGuardedWrapper } from './common/components/AuthGuardWrapper';
+import {
+  AuthGuardedWrapper,
+  PublicGuardedWrapper,
+} from './common/components/AuthGuardWrapper';
 
 export const AppRoute = createHashRouter([
   {
     path: '/',
-    element: <HomePage />,
+    element: (
+      <PublicGuardedWrapper>
+        <HomePage />
+      </PublicGuardedWrapper>
+    ),
   },
   {
     path: '/chat',
@@ -21,6 +28,11 @@ export const AppRoute = createHashRouter([
   {
     path: '/auth',
     children: authRouter,
+    element: (
+      <PublicGuardedWrapper>
+        <Outlet />
+      </PublicGuardedWrapper>
+    ),
   },
   {
     path: '*',

@@ -61,3 +61,44 @@ export const AuthGuardedWrapper: React.FC<PropsWithChildren> = ({
     </div>
   );
 };
+
+export const PublicGuardedWrapper: React.FC<PropsWithChildren> = ({
+  children,
+}) => {
+  const navigate = useNavigate();
+
+  const [, setGlobalUser] = useAtom(userAtom);
+
+  const { loading, refetch } = useQuery<{
+    identity__me: User;
+  }>(GET_USER_QUERIES, {
+    fetchPolicy: 'network-only',
+    onCompleted(data) {
+      console.log('AuthGuard:GET_USER_QUERIES', { data });
+      setGlobalUser(data?.identity__me);
+      navigate('/chat');
+    },
+    onError: (error: ApolloError) => {
+      console.log('AuthGuard', { error });
+    },
+  });
+
+  useEffect(() => {
+    $triggerRefetchMe.subscribe(() => {
+      refetch();
+    });
+  }, []);
+
+  return (
+    <div className="relative">
+      <LoadingOverlay
+        visible={loading}
+        opacity={10000}
+        overlayProps={{
+          blur: 1000,
+        }}
+      />
+      {children}
+    </div>
+  );
+};
