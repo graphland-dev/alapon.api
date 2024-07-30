@@ -2,8 +2,7 @@ import { getGqlServerError } from '@/common/utils/getGqlServerError';
 import { gql, useMutation } from '@apollo/client';
 import { ErrorMessage } from '@hookform/error-message';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Alert, Button, Input, Title } from '@mantine/core';
-import { useDebouncedCallback } from '@mantine/hooks';
+import { Alert, Button, Input, Textarea, Title } from '@mantine/core';
 import { IconAt } from '@tabler/icons-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -22,6 +21,9 @@ interface Props {
 const JoinInPersonForm: React.FC<Props> = ({ onComplete }) => {
   const form = useForm<IForm>({
     resolver: yupResolver(validationSchema),
+    defaultValues: {
+      messageText: 'Hi 😍 I would like to chat with you 👏',
+    },
   });
 
   const [joinInPersonMutation, joinInPersonMutationState] = useMutation(
@@ -31,7 +33,7 @@ const JoinInPersonForm: React.FC<Props> = ({ onComplete }) => {
   const handleOnSubmit: SubmitHandler<IForm> = (data) => {
     joinInPersonMutation({
       variables: {
-        input: { handle: data.handle },
+        input: { userHandle: data.userHandle, messageText: data.messageText },
       },
       onCompleted: () => {
         onComplete?.();
@@ -44,7 +46,7 @@ const JoinInPersonForm: React.FC<Props> = ({ onComplete }) => {
       className="flex flex-col gap-3"
       onSubmit={form.handleSubmit(handleOnSubmit)}
     >
-      <Title size="lg">Connect to user in person</Title>
+      <Title size="lg">Send private message</Title>
 
       {joinInPersonMutationState.error && (
         <Alert color="red">
@@ -54,13 +56,30 @@ const JoinInPersonForm: React.FC<Props> = ({ onComplete }) => {
 
       <Input.Wrapper
         label="User handle"
-        error={<ErrorMessage name={'handle'} errors={form.formState.errors} />}
+        withAsterisk
+        error={
+          <ErrorMessage name={'userHandle'} errors={form.formState.errors} />
+        }
       >
         <Input
           size="lg"
           leftSection={<IconAt size={16} />}
           placeholder="Type user handle"
-          {...form.register('handle')}
+          {...form.register('userHandle')}
+        />
+      </Input.Wrapper>
+
+      <Input.Wrapper
+        label="Your message"
+        withAsterisk
+        error={
+          <ErrorMessage name={'messageText'} errors={form.formState.errors} />
+        }
+      >
+        <Textarea
+          size="lg"
+          placeholder="Type initial message"
+          {...form.register('messageText')}
         />
       </Input.Wrapper>
 
@@ -69,7 +88,7 @@ const JoinInPersonForm: React.FC<Props> = ({ onComplete }) => {
         size="lg"
         loading={joinInPersonMutationState.loading}
       >
-        Connect
+        Send
       </Button>
     </form>
   );
@@ -78,6 +97,7 @@ const JoinInPersonForm: React.FC<Props> = ({ onComplete }) => {
 export default JoinInPersonForm;
 
 const validationSchema = yup.object({
-  handle: yup.string().required().label('Group handle'),
+  userHandle: yup.string().required().label('Group handle'),
+  messageText: yup.string().required().label('Message text'),
 });
 type IForm = yup.InferType<typeof validationSchema>;
