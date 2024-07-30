@@ -4,7 +4,7 @@ import { UnstyledButton } from '@mantine/core';
 import { IconSend2 } from '@tabler/icons-react';
 
 import { useAtomValue } from 'jotai';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 interface Props {
   roomId: string;
@@ -21,7 +21,12 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId, onMessageSend }) => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
+      if (textarea.scrollHeight > 250) {
+        textarea.style.height = '250px';
+        textarea.style.overflowY = 'auto';
+      } else {
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      }
     }
   };
 
@@ -36,6 +41,7 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId, onMessageSend }) => {
     });
     setMessage('');
     onMessageSend?.();
+    adjustTextareaHeight();
   };
 
   const handleChange = useCallback(
@@ -53,7 +59,9 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId, onMessageSend }) => {
         if (event.shiftKey || event.ctrlKey || event.metaKey) {
           event.preventDefault();
           setMessage((prevMessage) => prevMessage + '\n');
-          adjustTextareaHeight();
+          setTimeout(() => {
+            adjustTextareaHeight();
+          }, 0);
         } else {
           handleSendMessage();
           event.preventDefault();
@@ -67,16 +75,17 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId, onMessageSend }) => {
     <div className="relative">
       <textarea
         ref={textareaRef}
-        style={{ overflow: 'hidden', resize: 'none', height: '38px' }} // Ensure no overflow
-        className="w-full h-full px-2 py-1 focus:outline-none chat-input-shadow"
+        style={{ overflow: 'hidden', resize: 'none' }} // Ensure no overflow
+        className="w-full h-full p-3 focus:outline-none chat-input-shadow"
         placeholder="Type and hit enter"
         value={message}
+        rows={1}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
 
       <UnstyledButton
-        className="absolute right-2 top-2"
+        className="absolute right-2 top-1"
         onClick={handleSendMessage}
       >
         <IconSend2 className="text-slate-500" />

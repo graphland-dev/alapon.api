@@ -8,7 +8,7 @@ import RoomMessageComposer from './_components/RoomMessageComposer';
 import RoomMessages from './_components/RoomMessages';
 import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
 import { IconChevronLeft } from '@tabler/icons-react';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
@@ -29,6 +29,13 @@ const ChatRoomPage = () => {
       (member) => member.handle !== authUser?.handle,
     )?.handle;
   };
+
+  useEffect(() => {
+    messageBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // if (patams.roomId) {
+    //   messageBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // }
+  }, [patams?.roomId]);
 
   return (
     <div className="flex flex-col justify-between h-full">
@@ -68,9 +75,16 @@ const ChatRoomPage = () => {
       </div>
 
       {/* Chat Room Messages timeline */}
-      <div className="flex flex-col flex-auto gap-2 px-2 overflow-y-auto">
+      <div
+        className="flex flex-col flex-auto gap-2 px-2 overflow-y-auto"
+        id="messages-timeline"
+      >
         <RoomMessages roomId={patams.roomId!} />
-        <div data-name="timeline-bottom" ref={messageBottomRef} />
+        <div
+          data-name="timeline-bottom"
+          ref={messageBottomRef}
+          id="timeline-bottom"
+        />
       </div>
 
       {/* Input area */}
@@ -78,7 +92,9 @@ const ChatRoomPage = () => {
         <RoomMessageComposer
           roomId={patams.roomId!}
           onMessageSend={() => {
-            messageBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+              messageBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 200);
           }}
         />
       </div>
