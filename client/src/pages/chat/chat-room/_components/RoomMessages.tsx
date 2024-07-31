@@ -6,10 +6,8 @@ import { socketAtom } from '@/common/states/socketAtom';
 import { gql, useLazyQuery } from '@apollo/client';
 import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
-import CharRoomMessage from './ChatRoomMessage';
 import { messageSendByCurrentUserSubject } from '../utils/chat-controller.rxjs';
-import { set } from 'react-hook-form';
-import { IconChevronDown } from '@tabler/icons-react';
+import CharRoomMessage from './ChatRoomMessage';
 
 const ROOM_MESSAGES_QUERY = gql`
   query Chat__roomMessages($roomId: String!, $where: CommonPaginationOnlyDto) {

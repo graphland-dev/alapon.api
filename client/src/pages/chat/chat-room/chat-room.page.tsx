@@ -2,14 +2,13 @@ import { ChatRoom, ChatRoomType } from '@/common/api-models/graphql';
 import { userAtom } from '@/common/states/user.atom';
 import { useQuery } from '@apollo/client';
 import { Skeleton } from '@mantine/core';
+import { IconChevronLeft } from '@tabler/icons-react';
 import { useAtomValue } from 'jotai';
+import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import RoomMessageComposer from './_components/RoomMessageComposer';
 import RoomMessages from './_components/RoomMessages';
 import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
-import { IconChevronLeft } from '@tabler/icons-react';
-import { useEffect, useRef } from 'react';
-import { messageSendByCurrentUserSubject } from './utils/chat-controller.rxjs';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();

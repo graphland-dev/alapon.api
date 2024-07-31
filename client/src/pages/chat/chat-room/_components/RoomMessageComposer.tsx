@@ -1,4 +1,4 @@
-import { ChatMessage, ChatMessageType } from '@/common/api-models/graphql';
+import { ChatMessageType } from '@/common/api-models/graphql';
 import { socketAtom } from '@/common/states/socketAtom';
 import { userAtom } from '@/common/states/user.atom';
 import { UnstyledButton } from '@mantine/core';
