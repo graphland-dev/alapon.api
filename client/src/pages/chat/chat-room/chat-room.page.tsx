@@ -9,6 +9,7 @@ import RoomMessages from './_components/RoomMessages';
 import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
 import { IconChevronLeft } from '@tabler/icons-react';
 import { useEffect, useRef } from 'react';
+import { messageSendByCurrentUserSubject } from './utils/chat-controller.rxjs';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
@@ -76,27 +77,20 @@ const ChatRoomPage = () => {
 
       {/* Chat Room Messages timeline */}
       <div
-        className="flex flex-col flex-auto gap-2 px-2 overflow-y-auto"
-        id="messages-timeline"
+        className="relative flex flex-col flex-auto gap-2 px-2 overflow-y-auto"
+        id="chat-room-messages-timeline"
       >
         <RoomMessages roomId={patams.roomId!} />
         <div
           data-name="timeline-bottom"
           ref={messageBottomRef}
-          id="timeline-bottom"
+          id="chat-room-messages-timeline-bottom"
         />
       </div>
 
       {/* Input area */}
       <div className="flex-none p-2 pt-0 shadow-md">
-        <RoomMessageComposer
-          roomId={patams.roomId!}
-          onMessageSend={() => {
-            setTimeout(() => {
-              messageBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 500);
-          }}
-        />
+        <RoomMessageComposer roomId={patams.roomId!} />
       </div>
     </div>
   );

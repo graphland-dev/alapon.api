@@ -5,18 +5,13 @@ const ChatLayout = () => {
   return (
     <>
       {/* Desktop View */}
-      <div className="hidden h-screen md:flex">
-        <div className="w-[300px] flex-none bg-background">
+      <div className="flex h-screen">
+        <div className="w-[300px] flex-none bg-background hidden md:block">
           <ChatSidebar />
         </div>
         <div className="flex-auto">
           <Outlet />
         </div>
-      </div>
-
-      {/* Mobile View */}
-      <div className="h-screen md:hidden">
-        <Outlet />
       </div>
     </>
   );

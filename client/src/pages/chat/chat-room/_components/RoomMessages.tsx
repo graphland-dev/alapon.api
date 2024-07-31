@@ -7,6 +7,9 @@ import { gql, useLazyQuery } from '@apollo/client';
 import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
 import CharRoomMessage from './ChatRoomMessage';
+import { messageSendByCurrentUserSubject } from '../utils/chat-controller.rxjs';
+import { set } from 'react-hook-form';
+import { IconChevronDown } from '@tabler/icons-react';
 
 const ROOM_MESSAGES_QUERY = gql`
   query Chat__roomMessages($roomId: String!, $where: CommonPaginationOnlyDto) {
@@ -39,6 +42,7 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
   // console.log('Rendering RoomMessages');
   const socket = useAtomValue(socketAtom);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [visibleScrollBottom, setVisibleScrollBottom] = useState(false);
 
   const [fetchRoomMessages] = useLazyQuery<{
     chat__roomMessages: ChatMessagesWithPagination;
@@ -63,22 +67,43 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
     socket.emit(`join-room`, roomId);
     const handleMessage = (message: ChatMessage) => {
       setMessages((messages) => [...messages, message]);
-      // setTimeout(() => {
-      //   const scrollTopPosition =
-      //     document.getElementById('messages-timeline')?.scrollTop;
-      //   const scrollHeight =
-      //     document.getElementById('messages-timeline')?.scrollHeight;
-      //   console.log(scrollHeight! - scrollTopPosition!);
-      //   console.log('scroll-top-position', scrollTopPosition);
-      //   console.log('scroll-height', scrollHeight);
-      //   const fiftyPercent = scrollHeight! * 0.5;
-      //   if (scrollHeight! - scrollTopPosition! < fiftyPercent) {
-      //     document.getElementById('messages-timeline')?.scrollTo({
-      //       top: scrollHeight,
-      //       behavior: 'smooth',
-      //     });
-      //   }
-      // }, 500);
+      setTimeout(() => {
+        const scrollTop =
+          document.getElementById('chat-room-messages-timeline')?.scrollTop ||
+          0;
+
+        const scrollHeight =
+          document.getElementById('chat-room-messages-timeline')
+            ?.scrollHeight || 0;
+
+        const offsetHeight =
+          document.getElementById('chat-room-messages-timeline')
+            ?.offsetHeight || 0;
+
+        const scrollDistance = scrollHeight - scrollTop - offsetHeight;
+        console.log('-----------');
+        console.log('scrollHeight', scrollHeight);
+        console.log('scrollTop', scrollTop);
+        console.log('scrollDistance', scrollDistance);
+        console.log(
+          'offsetTop',
+          document.getElementById('chat-room-messages-timeline')?.offsetTop,
+        );
+        console.log(
+          'offsetHeight',
+          document.getElementById('chat-room-messages-timeline')?.offsetHeight,
+        );
+
+        if (scrollDistance < 1000) {
+          document
+            .getElementById('chat-room-messages-timeline-bottom')
+            ?.scrollIntoView({
+              behavior: 'smooth',
+            });
+        } else {
+          setVisibleScrollBottom(true);
+        }
+      });
     };
 
     socket.on(`room-messages:${roomId}`, handleMessage);
@@ -91,8 +116,37 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
     };
   }, [roomId]);
 
+  useEffect(() => {
+    messageSendByCurrentUserSubject.subscribe((message) => {
+      setMessages((messages) => [...messages, message]);
+      setTimeout(() => {
+        setVisibleScrollBottom(false);
+        document
+          .getElementById('chat-room-messages-timeline-bottom')
+          ?.scrollIntoView({
+            behavior: 'smooth',
+          });
+      });
+    });
+  }, []);
+
   return (
     <>
+      {visibleScrollBottom && (
+        <button
+          onClick={() => {
+            document
+              .getElementById('chat-room-messages-timeline-bottom')
+              ?.scrollIntoView({
+                behavior: 'smooth',
+              });
+            setVisibleScrollBottom(false);
+          }}
+          className="fixed flex items-center bottom-[80px] -translate-x-[50%] right-[10px] z-50 bg-green-500 text-primary-foreground px-4 rounded-sm shadow-lg"
+        >
+          <p>New Message(s)</p>
+        </button>
+      )}
       {messages!.map((message) => (
         <CharRoomMessage message={message} key={message?._id} />
       ))}

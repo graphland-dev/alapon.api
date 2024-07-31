@@ -1,3 +1,4 @@
+import { ChatMessage, ChatMessageType } from '@/common/api-models/graphql';
 import { socketAtom } from '@/common/states/socketAtom';
 import { userAtom } from '@/common/states/user.atom';
 import { UnstyledButton } from '@mantine/core';
@@ -5,13 +6,13 @@ import { IconSend2 } from '@tabler/icons-react';
 
 import { useAtomValue } from 'jotai';
 import React, { useCallback, useRef } from 'react';
+import { messageSendByCurrentUserSubject } from '../utils/chat-controller.rxjs';
 
 interface Props {
   roomId: string;
-  onMessageSend?: () => void;
 }
 
-const RoomMessageComposer: React.FC<Props> = ({ roomId, onMessageSend }) => {
+const RoomMessageComposer: React.FC<Props> = ({ roomId }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const socket = useAtomValue(socketAtom);
   const authUser = useAtomValue(userAtom);
@@ -40,7 +41,18 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId, onMessageSend }) => {
       userHandle: authUser?.handle,
     });
     setMessage('');
-    onMessageSend?.();
+    messageSendByCurrentUserSubject.next({
+      _id: window.crypto.randomUUID(),
+      text: message.trim(),
+      chatRoom: { _id: roomId as string },
+      messageType: ChatMessageType.UserMessage,
+      createdBy: {
+        _id: authUser?._id as string,
+        handle: authUser?.handle as string,
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
     adjustTextareaHeight();
   };
 
