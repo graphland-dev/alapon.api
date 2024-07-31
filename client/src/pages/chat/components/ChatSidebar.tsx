@@ -83,6 +83,7 @@ const ChatSidebar = () => {
     socket.on(
       `room-list-updated:${authUser?._id}`,
       (payload: { _id: string; room: ChatRoom }) => {
+        console.log('room-list-updated', payload);
         if (payload.room.lastMessageSender?._id !== authUser!._id) {
           const audio = new Audio('/chat.mp3');
           audio.play();

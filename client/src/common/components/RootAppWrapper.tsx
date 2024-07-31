@@ -11,6 +11,7 @@ const RootAppWrapper: React.FC<PropsWithChildren> = ({ children }) => {
     // console.log('user', authUser);
     socket.connect();
     socket.emit('join-socket', { userId: authUser?._id });
+    console.log('join-socket', authUser?._id);
 
     return () => {
       socket.disconnect();
