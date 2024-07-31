@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client';
 import { Skeleton } from '@mantine/core';
 import { IconChevronLeft } from '@tabler/icons-react';
 import { useAtomValue } from 'jotai';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import RoomMessageComposer from './_components/RoomMessageComposer';
 import RoomMessages from './_components/RoomMessages';
