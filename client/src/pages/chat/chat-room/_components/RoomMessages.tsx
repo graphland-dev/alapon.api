@@ -39,6 +39,7 @@ interface Props {
 const RoomMessages: React.FC<Props> = ({ roomId }) => {
   // console.log('Rendering RoomMessages');
   const socket = useAtomValue(socketAtom);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [visibleScrollBottom, setVisibleScrollBottom] = useState(false);
 
@@ -108,6 +109,7 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
             });
         } else {
           setVisibleScrollBottom(true);
+          setUnreadMessagesCount((count) => count + 1);
         }
       });
     };
@@ -146,11 +148,12 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
               ?.scrollIntoView({
                 behavior: 'smooth',
               });
+            setUnreadMessagesCount(0);
             setVisibleScrollBottom(false);
           }}
           className="fixed flex items-center bottom-[80px] -translate-x-[50%] right-[10px] z-50 bg-green-500 text-primary-foreground px-4 rounded-sm shadow-lg"
         >
-          <p>New Message(s)</p>
+          <p>New Message ({unreadMessagesCount})</p>
         </button>
       )}
 
