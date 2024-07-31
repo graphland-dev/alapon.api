@@ -2,38 +2,37 @@ import { ApolloProvider } from '@apollo/client';
 import { MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
-import { useEffect } from 'react';
+import { Provider as JotaiProvider } from 'jotai';
+import { DevTools as JotaiDevtools } from 'jotai-devtools';
 import { RouterProvider } from 'react-router-dom';
 import { apolloClient } from './common/clients/apollo.client';
-import socket from './common/clients/socket.io';
+import { jotaiStore } from './common/configs/jotai.store-config';
 import { mantineThemeConfig } from './common/configs/mantine.config';
 import { AppRoute } from './root.router';
+import RootAppWrapper from './common/components/RootAppWrapper';
 
 function RootApp() {
   console.log('Rendering RootApp');
 
-  useEffect(() => {
-    socket.connect();
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
   return (
     <>
-      <ApolloProvider client={apolloClient}>
-        <MantineProvider
-          withCssVariables
-          withGlobalClasses
-          theme={mantineThemeConfig}
-        >
-          <ModalsProvider>
-            <Notifications position="top-center" />
-            <RouterProvider router={AppRoute} />
-          </ModalsProvider>
-        </MantineProvider>
-      </ApolloProvider>
+      <JotaiProvider store={jotaiStore}>
+        <ApolloProvider client={apolloClient}>
+          <MantineProvider
+            withCssVariables
+            withGlobalClasses
+            theme={mantineThemeConfig}
+          >
+            <ModalsProvider>
+              <Notifications position="top-center" />
+              <JotaiDevtools store={jotaiStore} />
+              <RootAppWrapper>
+                <RouterProvider router={AppRoute} />
+              </RootAppWrapper>
+            </ModalsProvider>
+          </MantineProvider>
+        </ApolloProvider>
+      </JotaiProvider>
     </>
   );
 }

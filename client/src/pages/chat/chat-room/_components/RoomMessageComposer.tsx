@@ -1,5 +1,5 @@
 import { ChatMessageType } from '@/common/api-models/graphql';
-import { socketAtom } from '@/common/states/socketAtom';
+import { socketAtom } from '@/common/states/socket-io.atom';
 import { userAtom } from '@/common/states/user.atom';
 import { UnstyledButton } from '@mantine/core';
 import { IconSend2 } from '@tabler/icons-react';

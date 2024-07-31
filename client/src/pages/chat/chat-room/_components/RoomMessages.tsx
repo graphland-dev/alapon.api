@@ -2,7 +2,7 @@ import {
   ChatMessage,
   ChatMessagesWithPagination,
 } from '@/common/api-models/graphql';
-import { socketAtom } from '@/common/states/socketAtom';
+import { socketAtom } from '@/common/states/socket-io.atom';
 import { gql, useLazyQuery } from '@apollo/client';
 import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
@@ -43,6 +43,12 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [visibleScrollBottom, setVisibleScrollBottom] = useState(false);
 
+  const scrollToBottom = () => {
+    document
+      .getElementById('chat-room-messages-timeline-bottom')
+      ?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const [fetchRoomMessages] = useLazyQuery<{
     chat__roomMessages: ChatMessagesWithPagination;
   }>(ROOM_MESSAGES_QUERY, {
@@ -67,7 +73,6 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
     const handleMessage = (message: ChatMessage) => {
       const audio = new Audio('/chat.mp3');
       audio.play();
-
       document.title = `New Message - ${message.createdBy?.handle}`;
       setTimeout(() => {
         document.title = `Blackout Chat`;
@@ -102,11 +107,7 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
         );
 
         if (scrollDistance < 1000) {
-          document
-            .getElementById('chat-room-messages-timeline-bottom')
-            ?.scrollIntoView({
-              behavior: 'smooth',
-            });
+          scrollToBottom();
         } else {
           setVisibleScrollBottom(true);
           setUnreadMessagesCount((count) => count + 1);
@@ -125,15 +126,12 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
   }, [roomId]);
 
   useEffect(() => {
+    // Listen for self message emit
     messageSendByCurrentUserSubject.subscribe((message) => {
       setMessages((messages) => [...messages, message]);
       setTimeout(() => {
         setVisibleScrollBottom(false);
-        document
-          .getElementById('chat-room-messages-timeline-bottom')
-          ?.scrollIntoView({
-            behavior: 'smooth',
-          });
+        scrollToBottom();
       });
     });
   }, []);
@@ -143,11 +141,6 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
       {visibleScrollBottom && (
         <button
           onClick={() => {
-            document
-              .getElementById('chat-room-messages-timeline-bottom')
-              ?.scrollIntoView({
-                behavior: 'smooth',
-              });
             setUnreadMessagesCount(0);
             setVisibleScrollBottom(false);
           }}

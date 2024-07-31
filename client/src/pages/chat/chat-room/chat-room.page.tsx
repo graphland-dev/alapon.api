@@ -21,6 +21,12 @@ const ChatRoomPage = () => {
     variables: { roomId: patams.roomId },
   });
 
+  // const scrollToBottom = () => {
+  //   document
+  //     .getElementById('chat-room-messages-timeline-bottom')
+  //     ?.scrollIntoView({ behavior: 'smooth' });
+  // };
+
   const getHandleName = () => {
     if (chatRoomData?.chat__chatRoom.roomType === ChatRoomType.Group) {
       return chatRoomData?.chat__chatRoom.handle;
@@ -30,12 +36,9 @@ const ChatRoomPage = () => {
     )?.handle;
   };
 
-  useEffect(() => {
-    messageBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    // if (patams.roomId) {
-    //   messageBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    // }
-  }, [patams?.roomId]);
+  // useEffect(() => {
+  //   // scrollToBottom();
+  // }, [patams?.roomId]);
 
   return (
     <div className="flex flex-col justify-between h-full">
