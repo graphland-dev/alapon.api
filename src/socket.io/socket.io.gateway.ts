@@ -2,6 +2,7 @@ import { ChatMessageType } from '@/api/chat/chat-message/entities/chat-message.e
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -53,13 +54,6 @@ export class SocketIoGateway
     console.log(`Client ${client.id} left room: ${roomId}`);
   }
 
-  sendUserCount(roomId: string): void {
-    console.log(roomId);
-    // TODO: fix this
-    // const userCount = room ? room.size : 0; // Get the size of the Set
-    // console.log(`Room ${roomId} has ${userCount} users`);
-  }
-
   async sendMessageToSocketClients(
     clientIds: string[],
     eventName: string,
@@ -96,11 +90,15 @@ export class SocketIoGateway
       messageText: string;
       userHandle: string;
     },
+    @ConnectedSocket() socket: Socket,
   ) {
     const msgId = new mongoose.Types.ObjectId().toString();
     const time = new Date().toISOString();
 
-    this.io.to(data.roomId).emit(`room-messages:${data.roomId}`, {
+    // console.log(client);
+    // this.io.to(data.roomId).emit(`room-messages:${data.roomId}`, {});
+
+    socket.broadcast.to(data.roomId).emit(`room-messages:${data.roomId}`, {
       _id: msgId,
       messageType: ChatMessageType.USER_MESSAGE,
       createdBy: {

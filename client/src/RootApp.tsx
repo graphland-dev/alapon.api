@@ -8,23 +8,12 @@ import { apolloClient } from './common/clients/apollo.client';
 import socket from './common/clients/socket.io';
 import { mantineThemeConfig } from './common/configs/mantine.config';
 import { AppRoute } from './root.router';
-import { socketConnectedAtom } from './common/states/socketAtom';
-import { useAtom } from 'jotai';
 
 function RootApp() {
   console.log('Rendering RootApp');
-  const [, setSocketConnected] = useAtom(socketConnectedAtom);
 
   useEffect(() => {
     socket.connect();
-
-    socket.on('connect', () => {
-      setSocketConnected(true);
-    });
-
-    socket.on('disconnect', () => {
-      setSocketConnected(false);
-    });
 
     return () => {
       socket.disconnect();

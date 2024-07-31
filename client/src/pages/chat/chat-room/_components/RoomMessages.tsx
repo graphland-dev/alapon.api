@@ -55,10 +55,6 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
     onCompleted: (data) => {
       const apiReversedMessages = [...data.chat__roomMessages.nodes!].reverse();
       setMessages((messages) => [...messages, ...apiReversedMessages]);
-
-      document.getElementById('timeline-bottom')?.scrollIntoView({
-        behavior: 'smooth',
-      });
     },
   });
 
@@ -67,23 +63,24 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
     socket.emit(`join-room`, roomId);
     const handleMessage = (message: ChatMessage) => {
       setMessages((messages) => [...messages, message]);
-      setTimeout(() => {
-        const scrollTopPosition =
-          document.getElementById('messages-timeline')?.scrollTop;
-        const scrollHeight =
-          document.getElementById('messages-timeline')?.scrollHeight;
-        console.log(scrollHeight! - scrollTopPosition!);
-        console.log('scroll-top-position', scrollTopPosition);
-        console.log('scroll-height', scrollHeight);
-        const fiftyPercent = scrollHeight! * 0.5;
-        if (scrollHeight! - scrollTopPosition! < fiftyPercent) {
-          document.getElementById('messages-timeline')?.scrollTo({
-            top: scrollHeight,
-            behavior: 'smooth',
-          });
-        }
-      }, 500);
+      // setTimeout(() => {
+      //   const scrollTopPosition =
+      //     document.getElementById('messages-timeline')?.scrollTop;
+      //   const scrollHeight =
+      //     document.getElementById('messages-timeline')?.scrollHeight;
+      //   console.log(scrollHeight! - scrollTopPosition!);
+      //   console.log('scroll-top-position', scrollTopPosition);
+      //   console.log('scroll-height', scrollHeight);
+      //   const fiftyPercent = scrollHeight! * 0.5;
+      //   if (scrollHeight! - scrollTopPosition! < fiftyPercent) {
+      //     document.getElementById('messages-timeline')?.scrollTo({
+      //       top: scrollHeight,
+      //       behavior: 'smooth',
+      //     });
+      //   }
+      // }, 500);
     };
+
     socket.on(`room-messages:${roomId}`, handleMessage);
 
     fetchRoomMessages();

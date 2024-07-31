@@ -94,7 +94,7 @@ const ChatRoomPage = () => {
           onMessageSend={() => {
             setTimeout(() => {
               messageBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 200);
+            }, 500);
           }}
         />
       </div>
