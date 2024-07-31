@@ -64,6 +64,14 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
     if (!roomId) return;
     socket.emit(`join-room`, roomId);
     const handleMessage = (message: ChatMessage) => {
+      const audio = new Audio('/chat.mp3');
+      audio.play();
+
+      document.title = `New Message - ${message.createdBy?.handle}`;
+      setTimeout(() => {
+        document.title = `Blackout Chat`;
+      }, 3000);
+
       setMessages((messages) => [...messages, message]);
       setTimeout(() => {
         const scrollTop =
@@ -145,6 +153,7 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
           <p>New Message(s)</p>
         </button>
       )}
+
       {messages!.map((message) => (
         <CharRoomMessage message={message} key={message?._id} />
       ))}
