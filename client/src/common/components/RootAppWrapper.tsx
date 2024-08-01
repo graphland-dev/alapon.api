@@ -48,6 +48,7 @@ const RootAppWrapper: React.FC<PropsWithChildren> = ({ children }) => {
   });
 
   useEffect(() => {
+    socket.connect();
     $triggerRefetchMe.subscribe(() => {
       refetchMe();
     });
@@ -56,7 +57,6 @@ const RootAppWrapper: React.FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     if (!authUser) return;
 
-    socket.connect();
     socket.emit('join-socket', { userId: authUser?._id });
     console.log('join-socket', authUser?._id);
 

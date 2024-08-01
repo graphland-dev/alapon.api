@@ -16,23 +16,23 @@ function RootApp() {
 
   return (
     <>
-      <JotaiProvider store={jotaiStore}>
-        <ApolloProvider client={apolloClient}>
-          <MantineProvider
-            withCssVariables
-            withGlobalClasses
-            theme={mantineThemeConfig}
-          >
-            <ModalsProvider>
-              <Notifications position="top-center" />
-              <JotaiDevtools store={jotaiStore} />
+      <ApolloProvider client={apolloClient}>
+        <MantineProvider
+          withCssVariables
+          withGlobalClasses
+          theme={mantineThemeConfig}
+        >
+          <ModalsProvider>
+            <Notifications position="top-center" />
+            <JotaiDevtools store={jotaiStore} />
+            <JotaiProvider store={jotaiStore}>
               <RootAppWrapper>
                 <RouterProvider router={AppRoute} />
               </RootAppWrapper>
-            </ModalsProvider>
-          </MantineProvider>
-        </ApolloProvider>
-      </JotaiProvider>
+            </JotaiProvider>
+          </ModalsProvider>
+        </MantineProvider>
+      </ApolloProvider>
     </>
   );
 }

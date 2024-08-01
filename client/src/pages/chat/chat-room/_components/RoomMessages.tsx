@@ -95,18 +95,18 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
             ?.offsetHeight || 0;
 
         const scrollDistance = scrollHeight - scrollTop - offsetHeight;
-        console.log('-----------');
-        console.log('scrollHeight', scrollHeight);
-        console.log('scrollTop', scrollTop);
-        console.log('scrollDistance', scrollDistance);
-        console.log(
-          'offsetTop',
-          document.getElementById('chat-room-messages-timeline')?.offsetTop,
-        );
-        console.log(
-          'offsetHeight',
-          document.getElementById('chat-room-messages-timeline')?.offsetHeight,
-        );
+        // console.log('-----------');
+        // console.log('scrollHeight', scrollHeight);
+        // console.log('scrollTop', scrollTop);
+        // console.log('scrollDistance', scrollDistance);
+        // console.log(
+        //   'offsetTop',
+        //   document.getElementById('chat-room-messages-timeline')?.offsetTop,
+        // );
+        // console.log(
+        //   'offsetHeight',
+        //   document.getElementById('chat-room-messages-timeline')?.offsetHeight,
+        // );
 
         if (scrollDistance < 1000) {
           scrollToBottom();

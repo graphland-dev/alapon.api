@@ -95,7 +95,7 @@ const ChatSidebar = () => {
     socket.on(
       `room-list-updated:${authUser?._id}`,
       (payload: RoomListUpdatedSocketEvent) => {
-        console.log('room-list-updated', payload);
+        console.log('🔌 room-list-updated', payload);
 
         if (payload.room.lastMessageSender?._id !== authUser!._id) {
           playNotificationSoundAndSetDocumentTitle(

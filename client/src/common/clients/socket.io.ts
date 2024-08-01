@@ -7,15 +7,15 @@ const socket = io('/socket', {
 });
 
 socket.on('connect', () => {
-  console.log('Connected to socket server');
+  console.log('🚀 Connected to socket server');
 });
 
 socket.on('disconnect', (reason) => {
-  console.log('Disconnected from socket server:', reason);
+  console.log('💀 Disconnected from socket server:', reason);
 });
 
 socket.on('connect_error', (error) => {
-  console.error('Connection error:', error);
+  console.error('❌ Connection error:', error);
 });
 
 export default socket;
