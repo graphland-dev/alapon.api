@@ -1,10 +1,11 @@
 import { ChatRoom, ChatRoomType } from '@/common/api-models/graphql';
+import { $triggerRefetchChatRooms } from '@/common/rxjs-controllers';
 import { userAtom } from '@/common/states/user.atom';
 import { useMutation, useQuery } from '@apollo/client';
 import { Menu, Skeleton } from '@mantine/core';
+import { openConfirmModal } from '@mantine/modals';
 import { IconChevronLeft, IconDotsVertical } from '@tabler/icons-react';
 import { useAtomValue } from 'jotai';
-import { useRef } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import RoomMessageComposer from './_components/RoomMessageComposer';
 import RoomMessages from './_components/RoomMessages';
@@ -12,8 +13,6 @@ import {
   CHAT_ROOM_DETAILS_QUERY,
   LEAVE_CHAT_ROOM_MUTATION,
 } from './utils/query';
-import { openConfirmModal } from '@mantine/modals';
-import { $triggerRefetchChatRooms } from '@/common/rxjs-controllers';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
