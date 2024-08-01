@@ -21,6 +21,8 @@ import JoinInGroupForm from './modal-forms/JoinInGroupForm';
 import JoinInPersonForm from './modal-forms/JoinInPersonForm';
 import { socketAtom } from '@/common/states/socket-io.atom';
 import playNotificationSoundAndSetDocumentTitle from '@/common/utils/playNotificationSound';
+import { RoomListUpdatedSocketEvent } from '@/common/common-models/RoomListUpdatedSocketEvent';
+import { $triggerRefetchChatRooms } from '@/common/rxjs-controllers';
 
 const MY_CHAT_ROOMS_QUERY = gql`
   query Chat__myChatRooms($where: CommonPaginationOnlyDto) {
@@ -61,8 +63,9 @@ const ChatSidebar = () => {
     chat__myChatRooms: ChatRoomsWithPagination;
   }>(MY_CHAT_ROOMS_QUERY, {
     variables: { where: { limit: -1 } },
+    notifyOnNetworkStatusChange: true,
     onCompleted(data) {
-      console.log('Fetched chat rooms', data);
+      console.log('Fetched chat rooms', data.chat__myChatRooms.nodes);
       setChatRooms(data.chat__myChatRooms.nodes || []);
     },
   });
@@ -80,14 +83,20 @@ const ChatSidebar = () => {
 
   useEffect(() => {
     if (!authUser) return;
+
+    $triggerRefetchChatRooms.subscribe(() => {
+      refetch();
+    });
+
     // Deep clone chatRooms array
     const chatRoomCloned = _.cloneDeep(chatRooms);
     console.log('subscribe -> ', `room-list-updated:${authUser?._id}`);
 
     socket.on(
       `room-list-updated:${authUser?._id}`,
-      (payload: { _id: string; room: ChatRoom }) => {
+      (payload: RoomListUpdatedSocketEvent) => {
         console.log('room-list-updated', payload);
+
         if (payload.room.lastMessageSender?._id !== authUser!._id) {
           playNotificationSoundAndSetDocumentTitle(
             payload.room.lastMessageSender?.handle as string,
@@ -99,23 +108,36 @@ const ChatSidebar = () => {
           (room) => room?._id === payload?._id,
         );
 
-        if (roomIndex !== -1) {
-          console.log({ roomIndex });
-          chatRoomCloned[roomIndex] = payload.room;
-          console.log({ modiedChatRooms: chatRoomCloned });
-          setChatRooms(chatRoomCloned);
-        } else {
-          setChatRooms([payload.room, ...chatRooms]);
+        switch (payload.actionType) {
+          case 'room-added':
+            setChatRooms([payload.room, ...chatRooms]);
+            break;
+          case 'room-removed':
+            setChatRooms(
+              chatRoomCloned.filter((room) => room?._id !== payload._id),
+            );
+
+            break;
+          case 'room-updated':
+            console.log({ chatRoomCloned });
+            if (roomIndex !== -1) {
+              console.log({ roomIndex });
+              chatRoomCloned[roomIndex] = payload.room;
+              console.log({ modiedChatRooms: chatRoomCloned });
+              setChatRooms([...chatRoomCloned]);
+            }
+            break;
         }
       },
     );
     return () => {
       socket.off(`room-list-updated:${authUser?._id}`);
     };
-  }, [authUser]);
+  }, [authUser, chatRooms]);
 
   return (
     <>
+      <button onClick={() => refetch()}>Refetch</button>
       <div className="flex flex-col h-full">
         <div className="h-[40px] flex-none flex items-center gap-2 px-2 justify-between font-mono bg-primary text-primary-foreground">
           <UnstyledButton className="flex items-center gap-1">

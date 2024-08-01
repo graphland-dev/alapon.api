@@ -28,9 +28,7 @@ export const CHAT_ROOM_DETAILS_QUERY = gql`
 `;
 
 export const LEAVE_CHAT_ROOM_MUTATION = gql`
-  mutation LeaveChatRoom($roomId: String!) {
-    chat__leaveChatRoom(roomId: $roomId) {
-      _id
-    }
+  mutation Chat__leaveChatRoom($roomId: String!) {
+    chat__leaveChatRoom(roomId: $roomId)
   }
 `;

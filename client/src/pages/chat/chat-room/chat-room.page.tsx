@@ -8,8 +8,12 @@ import { useRef } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import RoomMessageComposer from './_components/RoomMessageComposer';
 import RoomMessages from './_components/RoomMessages';
-import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
+import {
+  CHAT_ROOM_DETAILS_QUERY,
+  LEAVE_CHAT_ROOM_MUTATION,
+} from './utils/query';
 import { openConfirmModal } from '@mantine/modals';
+import { $triggerRefetchChatRooms } from '@/common/rxjs-controllers';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
@@ -22,6 +26,16 @@ const ChatRoomPage = () => {
   }>(CHAT_ROOM_DETAILS_QUERY, {
     skip: patams.roomId === undefined,
     variables: { roomId: patams.roomId },
+  });
+
+  const [leaveChatRoom] = useMutation(LEAVE_CHAT_ROOM_MUTATION, {
+    onCompleted() {
+      $triggerRefetchChatRooms.next(true);
+      navigate('/chat');
+    },
+    onError(error) {
+      alert(error.message);
+    },
   });
 
   const getHandleName = () => {
@@ -38,7 +52,7 @@ const ChatRoomPage = () => {
       title: 'Are you sure you want to leave this chat?',
       labels: { confirm: 'Leave', cancel: 'Cancel' },
       onConfirm: () => {
-        navigate('/chat');
+        leaveChatRoom({ variables: { roomId: patams.roomId } });
       },
     });
   };

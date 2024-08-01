@@ -78,6 +78,8 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
         document.title = `Blackout Chat`;
       }, 3000);
 
+      console.log({ message });
+
       setMessages((messages) => [...messages, message]);
       setTimeout(() => {
         const scrollTop =

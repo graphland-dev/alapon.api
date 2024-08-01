@@ -30,6 +30,7 @@ const authMiddleware = new ApolloLink((operation, forward) => {
 
 export const apolloClient = new ApolloClient({
   link: from([authMiddleware, httpLink]),
+
   cache: new InMemoryCache({
     addTypename: false,
   }),
