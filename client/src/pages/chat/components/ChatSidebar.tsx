@@ -137,7 +137,6 @@ const ChatSidebar = () => {
 
   return (
     <>
-      <button onClick={() => refetch()}>Refetch</button>
       <div className="flex flex-col h-full">
         <div className="h-[40px] flex-none flex items-center gap-2 px-2 justify-between font-mono bg-primary text-primary-foreground">
           <UnstyledButton className="flex items-center gap-1">

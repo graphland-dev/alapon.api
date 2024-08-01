@@ -43,15 +43,10 @@ const ChatRoomItem: React.FC<Props> = ({ room }) => {
           </p>
         )}
         {room.lastMessage && (
-          <div className="flex flex-col">
-            <p className="text-xs truncate text-zinc-500">
-              {room.lastMessageSender && (
-                <b>{room.lastMessageSender?.handle}:</b>
-              )}
-              {room.lastMessage?.text}
-            </p>
-            <p className="text-xs text-zinc-500">{room._id}</p>
-          </div>
+          <p className="text-xs truncate text-zinc-500">
+            {room.lastMessageSender && <b>{room.lastMessageSender?.handle}:</b>}
+            {room.lastMessage?.text}
+          </p>
         )}
       </div>
     </Link>
