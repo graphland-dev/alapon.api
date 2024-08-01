@@ -19,7 +19,6 @@ const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const authUser = useAtomValue(userAtom);
-  const messageBottomRef = useRef<HTMLDivElement>(null);
 
   const { data: chatRoomData, loading } = useQuery<{
     chat__chatRoom: ChatRoom;
@@ -110,17 +109,7 @@ const ChatRoomPage = () => {
       </div>
 
       {/* Chat Room Messages timeline */}
-      <div
-        className="relative flex flex-col flex-auto gap-2 px-2 overflow-y-auto"
-        id="chat-room-messages-timeline"
-      >
-        <RoomMessages roomId={patams.roomId!} />
-        <div
-          data-name="timeline-bottom"
-          ref={messageBottomRef}
-          id="chat-room-messages-timeline-bottom"
-        />
-      </div>
+      <RoomMessages roomId={patams.roomId!} />
 
       {/* Input area */}
       <div className="flex-none p-2 pt-0 shadow-md">

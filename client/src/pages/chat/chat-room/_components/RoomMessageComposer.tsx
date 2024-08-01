@@ -99,7 +99,7 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId }) => {
 
       <UnstyledButton
         area-label="room-message-composer-button"
-        className="absolute right-2 top-[14px]"
+        className="absolute right-2 top-[13px]"
         onClick={handleSendMessage}
       >
         <IconSend2 className="text-slate-500" />

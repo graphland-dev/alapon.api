@@ -8,6 +8,7 @@ import { useAtomValue } from 'jotai';
 import { useEffect, useState } from 'react';
 import { messageSendByCurrentUserSubject } from '../utils/chat-controller.rxjs';
 import CharRoomMessage from './ChatRoomMessage';
+import { LoadingOverlay } from '@mantine/core';
 
 const ROOM_MESSAGES_QUERY = gql`
   query Chat__roomMessages($roomId: String!, $where: CommonPaginationOnlyDto) {
@@ -43,13 +44,20 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [visibleScrollBottom, setVisibleScrollBottom] = useState(false);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = (isSmooth = true) => {
+    // const timelineDivHeight =
+    //   document.getElementById('chat-room-messages-timeline')?.scrollHeight || 0;
+    // document.getElementById('chat-room-messages-timeline-bottom')?.scroll({
+    //   left: 0,
+    //   top: -timelineDivHeight,
+    //   behavior: 'smooth',
+    // });
     document
       .getElementById('chat-room-messages-timeline-bottom')
-      ?.scrollIntoView({ behavior: 'smooth' });
+      ?.scrollIntoView({ behavior: isSmooth ? 'smooth' : 'auto' });
   };
 
-  const [fetchRoomMessages] = useLazyQuery<{
+  const [fetchRoomMessages, fetchRoomMessagesState] = useLazyQuery<{
     chat__roomMessages: ChatMessagesWithPagination;
   }>(ROOM_MESSAGES_QUERY, {
     variables: {
@@ -61,9 +69,14 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
       },
     },
     fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: true,
     onCompleted: (data) => {
       const apiReversedMessages = [...data.chat__roomMessages.nodes!].reverse();
+      // const apiReversedMessages = [...data.chat__roomMessages.nodes!];
       setMessages((messages) => [...messages, ...apiReversedMessages]);
+      setTimeout(() => {
+        scrollToBottom(false);
+      });
     },
   });
 
@@ -77,8 +90,7 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
       setTimeout(() => {
         document.title = `Blackout Chat`;
       }, 3000);
-
-      console.log({ message });
+      console.log('🔌 room-messages:', message);
 
       setMessages((messages) => [...messages, message]);
       setTimeout(() => {
@@ -139,7 +151,12 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
   }, []);
 
   return (
-    <>
+    <div
+      className="relative flex flex-col flex-auto gap-2 px-2 overflow-y-auto"
+      id="chat-room-messages-timeline"
+    >
+      <LoadingOverlay visible={fetchRoomMessagesState.loading} />
+
       {visibleScrollBottom && (
         <button
           onClick={() => {
@@ -156,7 +173,12 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
       {messages!.map((message) => (
         <CharRoomMessage message={message} key={message?._id} />
       ))}
-    </>
+
+      <div
+        data-name="timeline-bottom"
+        id="chat-room-messages-timeline-bottom"
+      />
+    </div>
   );
 };
 
