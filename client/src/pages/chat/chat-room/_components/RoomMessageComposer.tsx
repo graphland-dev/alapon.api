@@ -84,8 +84,9 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId }) => {
   );
 
   return (
-    <div className="relative">
+    <div area-label="room-message-composer" className="relative">
       <textarea
+        area-label="room-message-composer-input"
         ref={textareaRef}
         style={{ overflow: 'hidden', resize: 'none' }} // Ensure no overflow
         className="w-full h-full p-3 focus:outline-none chat-input-shadow"
@@ -97,6 +98,7 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId }) => {
       />
 
       <UnstyledButton
+        area-label="room-message-composer-button"
         className="absolute right-2 top-[14px]"
         onClick={handleSendMessage}
       >
