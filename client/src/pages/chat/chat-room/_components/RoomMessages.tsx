@@ -145,6 +145,7 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
           onClick={() => {
             setUnreadMessagesCount(0);
             setVisibleScrollBottom(false);
+            scrollToBottom();
           }}
           className="fixed flex items-center bottom-[80px] -translate-x-[50%] right-[10px] z-50 bg-green-500 text-primary-foreground px-4 rounded-sm shadow-lg"
         >

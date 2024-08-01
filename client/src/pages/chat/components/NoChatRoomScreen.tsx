@@ -127,6 +127,10 @@ const NoRoomScreen = () => {
         </svg>
         <span>End-to-end encrypted</span>
       </p>
+
+      <div className="text-xs text-center text-slate-500">
+        <p>version 1.0.0</p>
+      </div>
     </div>
   );
 };
