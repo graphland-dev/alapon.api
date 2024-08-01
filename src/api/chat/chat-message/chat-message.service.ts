@@ -16,6 +16,7 @@ import { ChatRoomService } from '../chat-room/chat-room.service';
 import { CreateChatMessageInput } from './dto/chat-message.input';
 import { ChatMessage, ChatMessageType } from './entities/chat-message.entity';
 import { OnEvent } from '@nestjs/event-emitter';
+import { RoomListUpdatedSocketEvent } from '@/socket.io/contracts/RoomListUpdatedSocketEvent';
 
 @Injectable()
 export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
@@ -60,7 +61,7 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
     // Send message to socket channel
     await this.socketIoGateway.broadCastMessage(
       `room-messages:${input.roomId}`,
-      JSON.stringify(message),
+      message,
     );
 
     return message;
@@ -100,7 +101,7 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
   }
 
   @OnEvent('message-send-to-room')
-  async handleOrderCreatedEvent(payload: any) {
+  async handleSaveMessageEvent(payload: any) {
     // this.eventEmitter.emit('message-send-to-room', {
     //   _id: msgId,
     //   messageType: 'USER_MESSAGE',
@@ -135,14 +136,15 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
       this.socketIoGateway.sendSocketMessageToUser(
         member._id,
         `room-list-updated:${member._id}`,
-        {
+        new RoomListUpdatedSocketEvent({
           _id: _room._id,
+          actionType: 'room-updated',
           room: {
             ..._room.toJSON(),
             lastMessage: createdMessage.toJSON(),
             lastMessageSender: payload.createdBy,
           },
-        },
+        }).payload,
       );
     });
 

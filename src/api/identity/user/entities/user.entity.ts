@@ -21,7 +21,7 @@ export class User {
   _id: string;
 
   @Prop()
-  pin: string;
+  pin?: string;
 
   @Field(() => String)
   @Prop({ lowercase: true })
@@ -29,11 +29,11 @@ export class User {
 
   @Field(() => String, { nullable: true })
   @Prop()
-  referenceHandle: string;
+  referenceHandle?: string;
 
   // @Field(() => String)
   @Prop()
-  secret: string;
+  secret?: string;
 
   @Prop({ default: UserAccountStatus.ACTIVE })
   @Field(() => UserAccountStatus, { nullable: true })

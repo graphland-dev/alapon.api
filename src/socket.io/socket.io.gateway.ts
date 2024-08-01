@@ -60,7 +60,7 @@ export class SocketIoGateway
     @ConnectedSocket() socket: Socket,
   ): void {
     socket.join(`user:${data.userId}`);
-    this.logger.debug(`User ${data.userId} logged in`);
+    this.logger.debug(`join-socket -> userId:${data.userId}`);
   }
 
   @SubscribeMessage('leave-socket')
@@ -70,7 +70,7 @@ export class SocketIoGateway
     @ConnectedSocket() socket: Socket,
   ): void {
     socket.leave(`user:${data.userId}`);
-    this.logger.debug(`User ${data.userId} logged out`);
+    this.logger.debug(`leave-socket -> userId:${data.userId}`);
   }
 
   /**
@@ -147,7 +147,7 @@ export class SocketIoGateway
    * @param eventName - event name
    * @param data - data to send
    */
-  async broadCastMessage(eventName: string, data: string) {
+  async broadCastMessage(eventName: string, data: any) {
     this.logger.debug(
       `Message send to all users`,
       JSON.stringify({

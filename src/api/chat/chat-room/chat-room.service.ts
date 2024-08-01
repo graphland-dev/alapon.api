@@ -3,6 +3,8 @@ import { IAuthUser } from '@/authorization/decorators/user.decorator';
 import { BaseDatabaseRepository } from '@/common/database/BaseDatabaseRepository';
 import { CommonPaginationOnlyDto } from '@/common/dto/CommonPaginationDto';
 import { slugify } from '@/common/utils/slug';
+import { RoomListUpdatedSocketEvent } from '@/socket.io/contracts/RoomListUpdatedSocketEvent';
+import { SocketIoGateway } from '@/socket.io/socket.io.gateway';
 import {
   BadRequestException,
   ForbiddenException,
@@ -14,10 +16,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChatMessageService } from '../chat-message/chat-message.service';
-import {
-  ChatMessage,
-  ChatMessageType,
-} from '../chat-message/entities/chat-message.entity';
+import { ChatMessageType } from '../chat-message/entities/chat-message.entity';
 import {
   AddOrRemoveGroupModeratorInput,
   CreateChatGroupInput,
@@ -26,7 +25,6 @@ import {
   JoinOrLeaveGroupInput,
 } from './dto/chat-room.input';
 import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
-import { SocketIoGateway } from '@/socket.io/socket.io.gateway';
 
 @Injectable()
 export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
@@ -61,7 +59,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     });
 
     // Send system message to room
-    await this.chatMessageService.sendMessageToRoom({
+    const message = await this.chatMessageService.sendMessageToRoom({
       text: `@${_user.handle} has joined your private chat`,
       roomId: createdChatRoom._id,
       messageType: ChatMessageType.SYSTEM_MESSAGE,
@@ -79,21 +77,24 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     this.socketIoGateway.sendSocketMessageToUser(
       _user._id,
       `room-list-updated:${_user._id}`,
-      {
+      new RoomListUpdatedSocketEvent({
         _id: createdChatRoom._id,
+        actionType: 'room-added',
         room: {
           ...createdChatRoom.toJSON(),
           lastMessage: {
+            _id: message._id,
             text: input?.messageText,
+            chatRoom: createdChatRoom._id,
             createdBy: authUser?.sub,
             messageType: ChatMessageType.USER_MESSAGE,
-          } as ChatMessage,
+          },
           members: [
             { _id: authUser.sub, handle: authUser.handle },
             { _id: _user._id, handle: _user.handle },
           ],
         },
-      },
+      }).payload,
     );
 
     return createdChatRoom;
@@ -285,10 +286,11 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
         this.socketIoGateway.sendSocketMessageToUser(
           _user._id,
           `room-list-updated:${_user._id}`,
-          {
+          new RoomListUpdatedSocketEvent({
             _id: _room.id,
-            room: _room,
-          },
+            actionType: 'room-updated',
+            room: _room.toJSON(),
+          }).payload,
         );
       });
 
@@ -468,6 +470,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
 
   async leaveChatRoom(roomId: string, user: IAuthUser) {
     const _room = await this.chatRoomModel.findOne({ _id: roomId });
+    const members = _room.members;
     if (!_room) throw new NotFoundException('Invalid room id');
 
     if (_room.roomType === ChatRoomType.GROUP) {
@@ -510,6 +513,19 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
       // delete all room messages
       await this.chatMessageService.chatMessageModel.deleteMany({
         chatRoom: roomId,
+      });
+
+      // send socket message to user
+      members.forEach((member) => {
+        this.socketIoGateway.sendSocketMessageToUser(
+          member._id,
+          `room-list-updated:${member}`,
+          new RoomListUpdatedSocketEvent({
+            _id: _room.id,
+            actionType: 'room-removed',
+            room: _room.toJSON(),
+          }).payload,
+        );
       });
 
       return true;
