@@ -4,12 +4,14 @@ import ChatSidebar from './components/ChatSidebar';
 const ChatLayout = () => {
   return (
     <>
-      {/* Desktop View */}
-      <div className="flex h-screen">
-        <div className="w-[300px] flex-none bg-background hidden md:block">
+      <div area-label="chat-layout" className="flex h-[100dvh]">
+        <div
+          area-label="chat-room-list"
+          className="w-[300px] flex-none bg-background hidden md:block"
+        >
           <ChatSidebar />
         </div>
-        <div className="flex-auto">
+        <div area-label="chat-main" className="flex-auto h-[100dvh]">
           <Outlet />
         </div>
       </div>

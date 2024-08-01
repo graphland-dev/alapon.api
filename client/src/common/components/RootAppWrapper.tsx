@@ -5,6 +5,7 @@ import socket from '../clients/socket.io';
 import { ApolloError, gql, useQuery } from '@apollo/client';
 import { User } from '../api-models/graphql';
 import { LoadingOverlay } from '@mantine/core';
+import { $triggerRefetchMe } from '../rxjs-controllers';
 
 const GET_USER_QUERIES = gql`
   query GET_USER_QUERIES {
@@ -21,14 +22,20 @@ const GET_USER_QUERIES = gql`
 `;
 
 const RootAppWrapper: React.FC<PropsWithChildren> = ({ children }) => {
+  console.log('RootAppWrapper');
   const authUser = useAtomValue(userAtom);
   const [, setGlobalUser] = useAtom(userAtom);
   const [, setLoadingUser] = useAtom(loadingUserAtom);
 
-  const { loading, data } = useQuery<{
+  const {
+    loading,
+    data,
+    refetch: refetchMe,
+  } = useQuery<{
     identity__me: User;
   }>(GET_USER_QUERIES, {
     fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: true,
     onCompleted(data) {
       // console.log('AuthGuard:GET_USER_QUERIES', { data });
       setGlobalUser(data?.identity__me);
@@ -36,9 +43,15 @@ const RootAppWrapper: React.FC<PropsWithChildren> = ({ children }) => {
     },
     onError: (error: ApolloError) => {
       setLoadingUser(false);
-      console.log('AuthGuard', { error });
+      console.error('RootAppWrapper', 'unAuthorized', JSON.stringify(error));
     },
   });
+
+  useEffect(() => {
+    $triggerRefetchMe.subscribe(() => {
+      refetchMe();
+    });
+  }, []);
 
   useEffect(() => {
     if (!authUser) return;

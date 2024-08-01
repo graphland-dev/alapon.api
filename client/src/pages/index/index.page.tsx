@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 const HomePage = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-screen border-b-[6px] border-b-[#25D366]">
+    <div className="flex flex-col items-center justify-center h-[100dvh] border-b-[6px] border-b-[#25D366]">
       <div className="text-center">
         <h2 className="mt-4 text-2xl">Blackout Chat</h2>
         <p className="text-sm text-[#667781] my-3">

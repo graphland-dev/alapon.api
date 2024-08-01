@@ -6,12 +6,18 @@ import { useNavigate } from 'react-router-dom';
 export const AuthGuardedWrapper: React.FC<PropsWithChildren> = ({
   children,
 }) => {
+  console.log('AuthGuardedWrapper');
+
   const navigate = useNavigate();
   const authUser = useAtomValue(userAtom);
   const authUserLoading = useAtomValue(loadingUserAtom);
 
   useEffect(() => {
-    if (!authUser && !authUserLoading) navigate('/auth/login');
+    if (!authUserLoading) {
+      if (!authUser) {
+        navigate('/auth/login');
+      }
+    }
   }, [authUser, authUserLoading]);
 
   return <>{children}</>;
@@ -25,7 +31,11 @@ export const PublicGuardedWrapper: React.FC<PropsWithChildren> = ({
   const authUserLoading = useAtomValue(loadingUserAtom);
 
   useEffect(() => {
-    if (authUser && !authUserLoading) navigate('/chat');
+    if (!authUserLoading) {
+      if (authUser) {
+        navigate('/chat');
+      }
+    }
   }, [authUser, authUserLoading]);
 
   return <>{children}</>;

@@ -1,8 +1,7 @@
-import { atomWithStorage } from 'jotai/utils';
-import { User } from '../api-models/graphql';
 import { atom } from 'jotai';
+import { User } from '../api-models/graphql';
 
-export const userAtom = atomWithStorage<User | null>('auth:user', null);
+export const userAtom = atom<User | null>(null);
 export const loadingUserAtom = atom<boolean>(true);
 
 userAtom.debugLabel = 'userAtom';

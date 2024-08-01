@@ -8,12 +8,14 @@ import { LOGIN_MUTATION } from './utils/query';
 import { useMutation } from '@apollo/client';
 import { TokenService } from '@/common/utils/TokenService';
 import { getGqlServerError } from '@/common/utils/getGqlServerError';
+import { $triggerRefetchMe } from '@/common/rxjs-controllers';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [loginMutation, loginMutationState] = useMutation(LOGIN_MUTATION, {
     onCompleted: (data) => {
       TokenService.setToken(data?.identity__login?.token);
+      $triggerRefetchMe.next(true);
       navigate('/chat');
     },
     onError: (error) => {
