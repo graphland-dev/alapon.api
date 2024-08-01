@@ -67,7 +67,7 @@ const RootAppWrapper: React.FC<PropsWithChildren> = ({ children }) => {
   }, [data?.identity__me]);
 
   return (
-    <div className="relative">
+    <div area-label="root-app-wrapper" className="relative">
       <LoadingOverlay
         visible={loading}
         opacity={10000}

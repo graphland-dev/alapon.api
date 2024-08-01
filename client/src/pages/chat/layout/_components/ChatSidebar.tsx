@@ -15,10 +15,10 @@ import {
 import { useAtomValue } from 'jotai';
 import Lottie from 'lottie-react';
 import { useEffect, useState } from 'react';
-import ChatRoomItem from './ChatRoomItem';
-import CreateGroupForm from './modal-forms/CreateGroupForm';
-import JoinInGroupForm from './modal-forms/JoinInGroupForm';
-import JoinInPersonForm from './modal-forms/JoinInPersonForm';
+import ChatRoomItem from '../../components/ChatRoomItem';
+import CreateGroupForm from '../modal-forms/CreateGroupForm';
+import JoinInGroupForm from '../modal-forms/JoinInGroupForm';
+import JoinInPersonForm from '../modal-forms/JoinInPersonForm';
 import { socketAtom } from '@/common/states/socket-io.atom';
 import playNotificationSoundAndSetDocumentTitle from '@/common/utils/playNotificationSound';
 import { RoomListUpdatedSocketEvent } from '@/common/common-models/RoomListUpdatedSocketEvent';
@@ -138,10 +138,11 @@ const ChatSidebar = () => {
   return (
     <>
       <div className="flex flex-col h-full">
-        <div className="h-[40px] flex-none flex items-center gap-2 px-2 justify-between font-mono bg-primary text-primary-foreground">
-          <UnstyledButton className="flex items-center gap-1">
-            <p>@{authUser?.handle}</p>
-          </UnstyledButton>
+        <div className="h-[65px] flex-none flex items-center gap-2 px-2 justify-between font-mono bg-primary text-primary-foreground">
+          <div className="flex flex-col gap-1 pl-2">
+            <p className="text-lg">Blackout</p>
+            <p className="text-xs">@{authUser?.handle}</p>
+          </div>
           <Menu>
             <Menu.Target>
               <button className="btn btn-ghost btn-circle">

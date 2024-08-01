@@ -1,8 +1,21 @@
 import { RouteObject } from 'react-router-dom';
-import ChatLayout from './chat.layout';
+import ChatLayout from './layout/chat.layout';
 import ChatRoomPage from './chat-room/chat-room.page';
 import NoChatRoomScreen from './components/NoChatRoomScreen';
-import ChatSidebar from './components/ChatSidebar';
+import ChatSidebar from './layout/_components/ChatSidebar';
+import { useMediaQuery } from '@mantine/hooks';
+
+const ChatRootApp = () => {
+  const isMD = useMediaQuery('(min-width: 768px)');
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
+  return (
+    <div className="h-full">
+      {isMD && <NoChatRoomScreen />}
+      {isMobile && <ChatSidebar />}
+    </div>
+  );
+};
 
 export const chatRouter: RouteObject[] = [
   {
@@ -11,16 +24,7 @@ export const chatRouter: RouteObject[] = [
     children: [
       {
         path: '',
-        element: (
-          <div className="h-full">
-            <div className="hidden h-full md:block">
-              <NoChatRoomScreen />
-            </div>
-            <div className="md:hidden">
-              <ChatSidebar />
-            </div>
-          </div>
-        ),
+        element: <ChatRootApp />,
       },
       {
         path: ':roomId',
