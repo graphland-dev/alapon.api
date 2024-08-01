@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import RootApp from './RootApp.tsx';
 
+import 'jotai-devtools/styles.css';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import './styles/app.scss';

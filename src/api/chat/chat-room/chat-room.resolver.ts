@@ -166,14 +166,14 @@ export class ChatRoomResolver {
     }
   }
 
-  @Mutation(() => Boolean, { name: 'chat__leaveGroup' })
+  @Mutation(() => Boolean, { name: 'chat__leaveChatRoom' })
   @Authenticated()
-  leaveGroup(
-    @Args('input') input: JoinOrLeaveGroupInput,
+  leaveChatRoom(
+    @Args('roomId') roomId: string,
     @AuthenticatedUser() user: IAuthUser,
   ) {
     try {
-      return this.chatRoomService.leaveGroup(input, user);
+      return this.chatRoomService.leaveChatRoom(roomId, user);
     } catch (error) {
       throw new BadRequestException(error.message);
     }

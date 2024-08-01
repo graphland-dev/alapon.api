@@ -6,6 +6,7 @@ import { gql, useQuery } from '@apollo/client';
 import { Menu, Modal, Skeleton, UnstyledButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { openConfirmModal } from '@mantine/modals';
+import _ from 'lodash';
 import {
   IconChevronDown,
   IconDotsVertical,
@@ -19,6 +20,7 @@ import CreateGroupForm from './modal-forms/CreateGroupForm';
 import JoinInGroupForm from './modal-forms/JoinInGroupForm';
 import JoinInPersonForm from './modal-forms/JoinInPersonForm';
 import { socketAtom } from '@/common/states/socket-io.atom';
+import playNotificationSoundAndSetDocumentTitle from '@/common/utils/playNotificationSound';
 
 const MY_CHAT_ROOMS_QUERY = gql`
   query Chat__myChatRooms($where: CommonPaginationOnlyDto) {
@@ -78,31 +80,30 @@ const ChatSidebar = () => {
 
   useEffect(() => {
     if (!authUser) return;
-    const _chatRooms = [...chatRooms];
+    // Deep clone chatRooms array
+    const chatRoomCloned = _.cloneDeep(chatRooms);
     console.log('subscribe -> ', `room-list-updated:${authUser?._id}`);
+
     socket.on(
       `room-list-updated:${authUser?._id}`,
       (payload: { _id: string; room: ChatRoom }) => {
         console.log('room-list-updated', payload);
         if (payload.room.lastMessageSender?._id !== authUser!._id) {
-          const audio = new Audio('/chat.mp3');
-          audio.play();
-          document.title = `New Message - ${payload.room.lastMessageSender?.handle}`;
-          setTimeout(() => {
-            document.title = `Blackout Chat`;
-          }, 3000);
+          playNotificationSoundAndSetDocumentTitle(
+            payload.room.lastMessageSender?.handle as string,
+          );
         }
 
-        // console.log('room-list-updated', payload);
-        // check if room is in chatRooms, update that room state or create new room
-        const roomIndex = _chatRooms.findIndex(
+        const roomIndex = _.findIndex(
+          chatRoomCloned,
           (room) => room?._id === payload?._id,
         );
+
         if (roomIndex !== -1) {
-          // console.log({ roomIndex });
-          _chatRooms[roomIndex] = payload.room;
-          // console.log({ _chatRooms });
-          setChatRooms([..._chatRooms]);
+          console.log({ roomIndex });
+          chatRoomCloned[roomIndex] = payload.room;
+          console.log({ modiedChatRooms: chatRoomCloned });
+          setChatRooms(chatRoomCloned);
         } else {
           setChatRooms([payload.room, ...chatRooms]);
         }

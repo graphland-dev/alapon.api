@@ -14,7 +14,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChatMessageService } from '../chat-message/chat-message.service';
-import { ChatMessageType } from '../chat-message/entities/chat-message.entity';
+import {
+  ChatMessage,
+  ChatMessageType,
+} from '../chat-message/entities/chat-message.entity';
 import {
   AddOrRemoveGroupModeratorInput,
   CreateChatGroupInput,
@@ -23,6 +26,7 @@ import {
   JoinOrLeaveGroupInput,
 } from './dto/chat-room.input';
 import { ChatRoom, ChatRoomType } from './entities/chat-room.entity';
+import { SocketIoGateway } from '@/socket.io/socket.io.gateway';
 
 @Injectable()
 export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
@@ -32,6 +36,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     private readonly userService: UserService,
     @Inject(forwardRef(() => ChatMessageService))
     public readonly chatMessageService: ChatMessageService,
+    private readonly socketIoGateway: SocketIoGateway,
   ) {
     super(chatRoomModel);
   }
@@ -49,7 +54,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     console.log(_room);
     if (_room) throw new BadRequestException('You are already connected');
 
-    const res = await this.chatRoomModel.create({
+    const createdChatRoom = await this.chatRoomModel.create({
       members: [_user._id, authUser.sub],
       roomType: ChatRoomType.PRIVATE,
       owner: authUser?.sub,
@@ -58,19 +63,40 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     // Send system message to room
     await this.chatMessageService.sendMessageToRoom({
       text: `@${_user.handle} has joined your private chat`,
-      roomId: res._id,
+      roomId: createdChatRoom._id,
       messageType: ChatMessageType.SYSTEM_MESSAGE,
     });
 
     // Send initial message to room
     await this.chatMessageService.sendMessageToRoom({
       text: input?.messageText,
-      roomId: res._id,
+      roomId: createdChatRoom._id,
       messageType: ChatMessageType.USER_MESSAGE,
       userId: authUser?.sub,
     });
 
-    return res;
+    // send socket message to user
+    this.socketIoGateway.sendSocketMessageToUser(
+      _user._id,
+      `room-list-updated:${_user._id}`,
+      {
+        _id: createdChatRoom._id,
+        room: {
+          ...createdChatRoom.toJSON(),
+          lastMessage: {
+            text: input?.messageText,
+            createdBy: authUser?.sub,
+            messageType: ChatMessageType.USER_MESSAGE,
+          } as ChatMessage,
+          members: [
+            { _id: authUser.sub, handle: authUser.handle },
+            { _id: _user._id, handle: _user.handle },
+          ],
+        },
+      },
+    );
+
+    return createdChatRoom;
   }
 
   myChatRooms(where: CommonPaginationOnlyDto, fields: any, user: IAuthUser) {
@@ -254,6 +280,16 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
           roomId: _room.id,
           messageType: ChatMessageType.SYSTEM_MESSAGE,
         });
+
+        // send socket message to user
+        this.socketIoGateway.sendSocketMessageToUser(
+          _user._id,
+          `room-list-updated:${_user._id}`,
+          {
+            _id: _room.id,
+            room: _room,
+          },
+        );
       });
 
       return res.modifiedCount > 0;
@@ -430,43 +466,53 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     return res.modifiedCount > 0;
   }
 
-  async leaveGroup(input: JoinOrLeaveGroupInput, user: IAuthUser) {
-    // TODO: don't allow to leave owner
+  async leaveChatRoom(roomId: string, user: IAuthUser) {
+    const _room = await this.chatRoomModel.findOne({ _id: roomId });
+    if (!_room) throw new NotFoundException('Invalid room id');
 
-    const _room = await this.chatRoomModel.findOne({
-      handle: slugify(input.groupHandle),
-      roomType: ChatRoomType.GROUP,
-    });
+    if (_room.roomType === ChatRoomType.GROUP) {
+      // TODO: don't allow to leave owner
+      if (_room.owner.toString() === user.sub)
+        throw new BadRequestException(
+          'You are the owner of this group, you cannot leave',
+        );
 
-    if (!_room) throw new NotFoundException('Invalid group handle');
+      if (
+        !Boolean(
+          _room.members.map((member) => member.toString()).includes(user.sub),
+        )
+      ) {
+        throw new BadRequestException('You are not a member of this group');
+      }
 
-    if (
-      !Boolean(
-        _room.members.map((member) => member.toString()).includes(user.sub),
-      )
-    ) {
-      throw new BadRequestException('You are not a member of this group');
+      const handleUsers = await this.userService.userModel
+        .find({ handle: user.handle })
+        .select('_id');
+
+      const res = await this.chatRoomModel.updateOne(
+        { _id: roomId },
+        { $pullAll: { members: handleUsers.map((user) => user._id) } },
+      );
+      // TODO: send system message to room
+      await this.chatMessageService.sendMessageToRoom({
+        text: `@${user.handle} left`,
+        roomId: _room.id,
+        messageType: ChatMessageType.SYSTEM_MESSAGE,
+      });
+
+      return res.modifiedCount > 0;
     }
 
-    const handleUsers = await this.userService.userModel
-      .find({ handle: user.handle })
-      .select('_id');
+    if (_room.roomType === ChatRoomType.PRIVATE) {
+      // delete chat room
+      await this.chatRoomModel.deleteOne({ _id: roomId });
 
-    const res = await this.chatRoomModel.updateOne(
-      { handle: slugify(input.groupHandle) },
-      {
-        $pullAll: {
-          members: handleUsers.map((user) => user._id),
-        },
-      },
-    );
-    // TODO: send system message to room
-    await this.chatMessageService.sendMessageToRoom({
-      text: `@${user.handle} left`,
-      roomId: _room.id,
-      messageType: ChatMessageType.SYSTEM_MESSAGE,
-    });
+      // delete all room messages
+      await this.chatMessageService.chatMessageModel.deleteMany({
+        chatRoom: roomId,
+      });
 
-    return res.modifiedCount > 0;
+      return true;
+    }
   }
 }

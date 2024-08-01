@@ -5,11 +5,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ChatRoom, ChatRoomSchema } from './entities/chat-room.entity';
 import { UserModule } from '@/api/identity/user/user.module';
 import { ChatMessageModule } from '../chat-message/chat-message.module';
+import { SocketIoModule } from '@/socket.io/socket.io.module';
 
 @Module({
   imports: [
     UserModule,
     forwardRef(() => ChatMessageModule),
+    SocketIoModule,
     MongooseModule.forFeature([
       { name: ChatRoom.name, schema: ChatRoomSchema },
     ]),

@@ -1,104 +1,32 @@
-import { userAtom } from '@/common/states/user.atom';
-import { ApolloError, gql, useQuery } from '@apollo/client';
-import { LoadingOverlay } from '@mantine/core';
-import { useAtom } from 'jotai';
+import { loadingUserAtom, userAtom } from '@/common/states/user.atom';
+import { useAtomValue } from 'jotai';
 import React, { PropsWithChildren, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User } from '../api-models/graphql';
-import { $triggerRefetchMe } from '../rxjs-controllers';
-
-const GET_USER_QUERIES = gql`
-  query GET_USER_QUERIES {
-    identity__me {
-      _id
-      handle
-      referenceHandle
-      accountStatus
-      lastLoginAt
-      createdAt
-      updatedAt
-    }
-  }
-`;
 
 export const AuthGuardedWrapper: React.FC<PropsWithChildren> = ({
   children,
 }) => {
   const navigate = useNavigate();
-
-  const [, setGlobalUser] = useAtom(userAtom);
-
-  const { loading, refetch } = useQuery<{
-    identity__me: User;
-  }>(GET_USER_QUERIES, {
-    fetchPolicy: 'network-only',
-    onCompleted(data) {
-      console.log('AuthGuard:GET_USER_QUERIES', { data });
-      setGlobalUser(data?.identity__me);
-    },
-    onError: (error: ApolloError) => {
-      console.log('AuthGuard', { error });
-      navigate('/auth/login');
-    },
-  });
+  const authUser = useAtomValue(userAtom);
+  const authUserLoading = useAtomValue(loadingUserAtom);
 
   useEffect(() => {
-    $triggerRefetchMe.subscribe(() => {
-      refetch();
-    });
-  }, []);
+    if (!authUser && !authUserLoading) navigate('/auth/login');
+  }, [authUser, authUserLoading]);
 
-  return (
-    <div className="relative">
-      <LoadingOverlay
-        visible={loading}
-        opacity={10000}
-        overlayProps={{
-          blur: 1000,
-        }}
-      />
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 };
 
 export const PublicGuardedWrapper: React.FC<PropsWithChildren> = ({
   children,
 }) => {
   const navigate = useNavigate();
-
-  const [, setGlobalUser] = useAtom(userAtom);
-
-  const { loading, refetch } = useQuery<{
-    identity__me: User;
-  }>(GET_USER_QUERIES, {
-    fetchPolicy: 'network-only',
-    onCompleted(data) {
-      console.log('AuthGuard:GET_USER_QUERIES', { data });
-      setGlobalUser(data?.identity__me);
-      navigate('/chat');
-    },
-    onError: (error: ApolloError) => {
-      console.log('AuthGuard', { error });
-    },
-  });
+  const authUser = useAtomValue(userAtom);
+  const authUserLoading = useAtomValue(loadingUserAtom);
 
   useEffect(() => {
-    $triggerRefetchMe.subscribe(() => {
-      refetch();
-    });
-  }, []);
+    if (authUser && !authUserLoading) navigate('/chat');
+  }, [authUser, authUserLoading]);
 
-  return (
-    <div className="relative">
-      <LoadingOverlay
-        visible={loading}
-        opacity={10000}
-        overlayProps={{
-          blur: 1000,
-        }}
-      />
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 };

@@ -25,11 +25,11 @@ export class ChatRoom {
   @Prop({ lowercase: true })
   handle: string;
 
-  @Field(() => Boolean)
+  @Field(() => Boolean, { nullable: true })
   @Prop({ default: false })
   isNsfw: boolean;
 
-  @Field(() => ChatRoomType)
+  @Field(() => ChatRoomType, { nullable: true })
   @Prop()
   roomType: ChatRoomType;
 

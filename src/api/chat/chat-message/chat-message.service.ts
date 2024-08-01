@@ -113,16 +113,38 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
     this.logger.debug('Storing socket message to database', payload);
     const createdMessage = await this.chatMessageModel.create(payload);
 
+    const _room = await this.chatRoomService.chatRoomModel
+      .findOne({
+        _id: payload.chatRoom,
+      })
+      .populate('members');
+
     // Update last message
     const updatedRoom = await this.chatRoomService.chatRoomModel.updateOne(
       { _id: payload.chatRoom },
       {
         $set: {
           lastMessage: payload._id,
-          lastMessageSender: payload.createdBy,
+          lastMessageSender: payload.createdBy._id,
         },
       },
     );
+
+    // send socket message to user
+    _room.members.forEach((member) => {
+      this.socketIoGateway.sendSocketMessageToUser(
+        member._id,
+        `room-list-updated:${member._id}`,
+        {
+          _id: _room._id,
+          room: {
+            ..._room.toJSON(),
+            lastMessage: createdMessage.toJSON(),
+            lastMessageSender: payload.createdBy,
+          },
+        },
+      );
+    });
 
     console.log(
       JSON.stringify(

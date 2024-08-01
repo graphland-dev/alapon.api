@@ -44,7 +44,6 @@ export class SocketIoGateway
   @SubscribeMessage('join-room')
   handleJoinRoom(client: Socket, roomId: string): void {
     client.join(roomId);
-    this.io.to(roomId).emit('room-online-count', this.io.sockets.size);
     console.log(`Client ${client.id} joined room: ${roomId}`);
   }
 
@@ -52,6 +51,41 @@ export class SocketIoGateway
   handleLeaveRoom(client: Socket, roomId: string): void {
     client.leave(roomId);
     console.log(`Client ${client.id} left room: ${roomId}`);
+  }
+
+  @SubscribeMessage('join-socket')
+  loginUser(
+    @MessageBody()
+    data: { userId: string },
+    @ConnectedSocket() socket: Socket,
+  ): void {
+    socket.join(`user:${data.userId}`);
+    this.logger.debug(`User ${data.userId} logged in`);
+  }
+
+  @SubscribeMessage('leave-socket')
+  logoutUser(
+    @MessageBody()
+    data: { userId: string },
+    @ConnectedSocket() socket: Socket,
+  ): void {
+    socket.leave(`user:${data.userId}`);
+    this.logger.debug(`User ${data.userId} logged out`);
+  }
+
+  /**
+   * Send message to user
+   * @param userId - user id
+   * @param channel - channel name
+   * @param message - message to send
+   */
+  sendSocketMessageToUser(userId: string, channel: string, message: any) {
+    this.io.to(`user:${userId}`).emit(channel, message);
+    this.logger.debug(
+      `Message send to user: ${userId} -> ${channel} -> ${JSON.stringify(
+        message,
+      )}`,
+    );
   }
 
   async sendMessageToSocketClients(
@@ -65,24 +99,8 @@ export class SocketIoGateway
     );
   }
 
-  /**
-   * Broadcast message to all connected users
-   * @param eventName - event name
-   * @param data - data to send
-   */
-  async broadCastMessage(eventName: string, data: string) {
-    this.logger.debug(
-      `Message send to all users`,
-      JSON.stringify({
-        eventName,
-        data,
-      }),
-    );
-    return this.io.emit(eventName, data);
-  }
-
   @SubscribeMessage('send-room-message')
-  async getRoomMessageFromClient(
+  async handleSendRoomMessage(
     @MessageBody()
     data: {
       roomId: string;
@@ -94,9 +112,6 @@ export class SocketIoGateway
   ) {
     const msgId = new mongoose.Types.ObjectId().toString();
     const time = new Date().toISOString();
-
-    // console.log(client);
-    // this.io.to(data.roomId).emit(`room-messages:${data.roomId}`, {});
 
     socket.broadcast.to(data.roomId).emit(`room-messages:${data.roomId}`, {
       _id: msgId,
@@ -117,10 +132,29 @@ export class SocketIoGateway
       _id: msgId,
       messageType: 'USER_MESSAGE',
       text: data.messageText,
-      createdBy: data.userId,
+      createdBy: {
+        handle: data.userHandle,
+        _id: data.userId,
+      },
       chatRoom: data.roomId,
       createdAt: time,
       updatedAt: time,
     });
+  }
+
+  /**
+   * Broadcast message to all connected users
+   * @param eventName - event name
+   * @param data - data to send
+   */
+  async broadCastMessage(eventName: string, data: string) {
+    this.logger.debug(
+      `Message send to all users`,
+      JSON.stringify({
+        eventName,
+        data,
+      }),
+    );
+    return this.io.emit(eventName, data);
   }
 }
