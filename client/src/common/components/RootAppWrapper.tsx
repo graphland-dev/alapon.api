@@ -22,7 +22,7 @@ const GET_USER_QUERIES = gql`
 `;
 
 const RootAppWrapper: React.FC<PropsWithChildren> = ({ children }) => {
-  console.log('RootAppWrapper');
+  console.log('RootAppWrapper 1.0.0');
   const authUser = useAtomValue(userAtom);
   const [, setGlobalUser] = useAtom(userAtom);
   const [, setLoadingUser] = useAtom(loadingUserAtom);
