@@ -4,6 +4,7 @@ import { UserResolver } from './user.resolver';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './entities/user.entity';
 import { ReferenceRequestModule } from '../reference-request/reference-request.module';
+import { UserController } from './user.controller';
 
 @Module({
   imports: [
@@ -12,5 +13,6 @@ import { ReferenceRequestModule } from '../reference-request/reference-request.m
   ],
   providers: [UserResolver, UserService],
   exports: [UserService],
+  controllers: [UserController],
 })
 export class UserModule {}

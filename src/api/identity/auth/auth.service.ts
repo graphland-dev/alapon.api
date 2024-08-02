@@ -77,7 +77,7 @@ export class AuthService {
     return true;
   }
 
-  async joinUser(input: JoinUserInput) {
+  async joinUser(input: JoinUserInput, bypassReferenceHandle = false) {
     if (input.handle === input.referenceHandle)
       throw new BadRequestException(
         'Handle and reference handle cannot be same',
@@ -88,14 +88,6 @@ export class AuthService {
       handle: slugify(input.handle),
     });
     if (user) throw new BadRequestException('Handle is already taken');
-
-    // check referenceHandle is available
-    const referenceUser = await this.userService.userModel.findOne({
-      handle: slugify(input.referenceHandle),
-    });
-
-    if (!referenceUser)
-      throw new BadRequestException('Reference handle is invalid');
 
     // start transaction
     const session = await this.mongooseConnection.startSession();
@@ -111,12 +103,21 @@ export class AuthService {
         secret,
       });
 
-      // create reference request
-      await this.referenceRequestService.createOne({
-        requesterUser: createdUser._id,
-        referenceUser: referenceUser._id,
-        status: ReferenceRequestStatus.PENDING,
-      });
+      if (!bypassReferenceHandle) {
+        // check referenceHandle is available
+        const referenceUser = await this.userService.userModel.findOne({
+          handle: slugify(input.referenceHandle),
+        });
+        if (!referenceUser)
+          throw new BadRequestException('Reference handle is invalid');
+
+        // create reference request
+        await this.referenceRequestService.createOne({
+          requesterUser: createdUser._id,
+          referenceUser: referenceUser._id,
+          status: ReferenceRequestStatus.PENDING,
+        });
+      }
 
       // commit transaction
       await session.commitTransaction();

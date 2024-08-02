@@ -6,7 +6,7 @@ import { gql, useQuery } from '@apollo/client';
 import { Menu, Modal, Skeleton, UnstyledButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { openConfirmModal } from '@mantine/modals';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import {
   IconChevronDown,
   IconDotsVertical,
@@ -23,6 +23,7 @@ import { socketAtom } from '@/common/states/socket-io.atom';
 import playNotificationSoundAndSetDocumentTitle from '@/common/utils/playNotificationSound';
 import { RoomListUpdatedSocketEvent } from '@/common/common-models/RoomListUpdatedSocketEvent';
 import { $triggerRefetchChatRooms } from '@/common/rxjs-controllers';
+import ResetPinForm from '@/common/components/forms/ResetPinForm';
 
 const MY_CHAT_ROOMS_QUERY = gql`
   query Chat__myChatRooms($where: CommonPaginationOnlyDto) {
@@ -55,6 +56,7 @@ const ChatSidebar = () => {
 
   const [joinInGroupModalOpened, joinInGroupModalHandler] =
     useDisclosure(false);
+  const [resetPinModalOpened, resetPinModalHandler] = useDisclosure(false);
 
   const [createGroupModalOpened, createGroupModalHandler] =
     useDisclosure(false);
@@ -159,6 +161,9 @@ const ChatSidebar = () => {
               <Menu.Item onClick={joinInGroupModalHandler.open}>
                 Join Group
               </Menu.Item>
+              <Menu.Item onClick={resetPinModalHandler.open}>
+                Reset Pin
+              </Menu.Item>
               <Menu.Item
                 onClick={handleLogout}
                 leftSection={<IconLogout size={14} />}
@@ -207,6 +212,9 @@ const ChatSidebar = () => {
                     <Menu.Item onClick={joinInGroupModalHandler.open}>
                       Join Group
                     </Menu.Item>
+                    <Menu.Item onClick={resetPinModalHandler.open}>
+                      Reset Pin
+                    </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
               </div>
@@ -251,6 +259,16 @@ const ChatSidebar = () => {
           onComplete={() => {
             joinInGroupModalHandler.close();
             refetch();
+          }}
+        />
+      </Modal>
+
+      <Modal opened={resetPinModalOpened} onClose={resetPinModalHandler.close}>
+        <ResetPinForm
+          onComplete={() => {
+            setTimeout(() => {
+              resetPinModalHandler.close();
+            }, 3000);
           }}
         />
       </Modal>

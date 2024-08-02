@@ -93,6 +93,13 @@ const LoginPage = () => {
               Join now
             </Link>
           </p>
+
+          <p>
+            Forgot your pin?{' '}
+            <Link to="/auth/reset-pin" className="link">
+              Reset it
+            </Link>
+          </p>
         </div>
       </Paper>
     </div>
