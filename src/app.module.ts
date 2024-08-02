@@ -25,7 +25,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     // }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client/dist'),
-      exclude: ['/api/(.*)', '/graphql'],
+      exclude: ['/api/(.*)', '/graphql', '/docs'],
     }),
     EventEmitterModule.forRoot(),
     MongooseModule.forRoot(process.env.DATABASE_URL, {
