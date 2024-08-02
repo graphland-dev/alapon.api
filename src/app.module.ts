@@ -29,7 +29,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
     EventEmitterModule.forRoot(),
     MongooseModule.forRoot(process.env.DATABASE_URL, {
-      dbName: 'offline-chat-' + process.env.NODE_ENV,
+      dbName: 'backout-chat-' + process.env.NODE_ENV,
       retryDelay: 5000,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({

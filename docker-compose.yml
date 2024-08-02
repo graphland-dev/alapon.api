@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backout_chat:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      # Only will build production stage from our dockerfile
+      # target: production
+      target: production
+    # volumes:
+      # - .:/application
+    env_file:
+      - .env.prod
+    ports:
+      - 4002:4001
+    depends_on:
+      - mongodb_database
+    restart: always
+  mongodb_database:
+    image: mongo:6
+    restart: always
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: QfHt5rmkwuJqz
+      MONGO_INITDB_ROOT_PASSWORD: ixakgJK5fJbRmNE4536SK
+    ports:
+      - 27018:27017
+    volumes:
+      - ./.docker-files/database/:/data/db/
+      - /etc/timezone:/etc/timezone:ro
