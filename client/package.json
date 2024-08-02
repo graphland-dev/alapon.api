@@ -19,6 +19,7 @@
     "@mantine/modals": "^7.11.2",
     "@mantine/notifications": "^7.11.2",
     "@tabler/icons-react": "^3.11.0",
+    "axios": "^1.7.3",
     "clsx": "^2.1.1",
     "jotai": "^2.9.1",
     "lodash": "^4.17.21",
