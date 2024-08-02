@@ -21,7 +21,8 @@ WORKDIR /application
 
 COPY --chown=node:node package*.json ./
 
-RUN npm ci --only=production && npm cache clean --force
+# RUN npm ci --only=production && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 COPY --chown=node:node . .
 
