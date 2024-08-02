@@ -20,7 +20,7 @@ services:
   mongodb_database:
     image: mongo:6
     restart: always
-    container_name: mongo
+    container_name: blackout_chat_mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: QfHt5rmkwuJqz
       MONGO_INITDB_ROOT_PASSWORD: ixakgJK5fJbRmNE4536SK
