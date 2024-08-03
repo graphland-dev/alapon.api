@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Alert, Button, Input, PinInput, Text } from '@mantine/core';
 import { Dropzone } from '@mantine/dropzone';
-import React, { useState } from 'react';
+import React from 'react';
 import * as yup from 'yup';
 
 import { userAtom } from '@/common/states/user.atom';
@@ -10,7 +10,6 @@ import { gql, useMutation } from '@apollo/client';
 import { ErrorMessage } from '@hookform/error-message';
 import {
   IconLockSquareRoundedFilled,
-  IconSquareRoundedCheck,
   IconSquareRoundedCheckFilled,
 } from '@tabler/icons-react';
 import { useAtomValue } from 'jotai';
