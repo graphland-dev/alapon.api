@@ -168,8 +168,8 @@ case "$1" in
     install_node)
         install_node
         ;;
-    setup_nestjs)
-        setup_nestjs
+    bootstrap_app)
+        bootstrap_app
         ;;
     help)
         display_help
