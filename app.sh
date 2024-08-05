@@ -144,7 +144,7 @@ function display_help() {
     echo "  install_mongodb - Install MongoDB"
     echo "  install_redis   - Install Redis"
     echo "  install_node    - Install Node.js and npm"
-    echo "  setup_nestjs    - Setup NestJS application"
+    echo "  setup_app       - Setup application"
     echo "  help            - Display this help message"
 }
 
