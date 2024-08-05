@@ -76,7 +76,7 @@ function install_node() {
 }
 
 # Function to setup NestJS Application
-function setup_app() {
+function bootstrap_app() {
     echo "Setting up NestJS application..."
 
     # Check if package.json exists in the current directory
@@ -108,7 +108,7 @@ function setup_app() {
 
     # Define the service file content
     SERVICE_CONTENT="[Unit]
-Description=NestJS Application
+Description=Blackout Chat Application
 After=network.target
 
 [Service]
@@ -144,7 +144,7 @@ function display_help() {
     echo "  install_mongodb - Install MongoDB"
     echo "  install_redis   - Install Redis"
     echo "  install_node    - Install Node.js and npm"
-    echo "  setup_app       - Setup application"
+    echo "  bootstrap_app   - Bootstrap application"
     echo "  help            - Display this help message"
 }
 
