@@ -136,6 +136,23 @@ WantedBy=multi-user.target"
     echo "You can check the status with: sudo systemctl status $SERVICE_NAME"
 }
 
+
+# Function to stop NestJS service
+function stop_service() {
+    SERVICE_NAME="blackout-chat"
+    echo "Stopping NestJS service..."
+    sudo systemctl stop $SERVICE_NAME
+    echo "NestJS service stopped successfully!"
+}
+
+# Function to restart NestJS service
+function restart_service() {
+    SERVICE_NAME="blackout-chat"
+    echo "Restarting NestJS service..."
+    sudo systemctl restart $SERVICE_NAME
+    echo "NestJS service restarted successfully!"
+}
+
 # Display help message
 function display_help() {
     echo "Usage: ./app.sh [function_name]"
@@ -145,6 +162,8 @@ function display_help() {
     echo "  install_redis   - Install Redis"
     echo "  install_node    - Install Node.js and npm"
     echo "  bootstrap_app   - Bootstrap application"
+    echo "  stop_service    - Stop NestJS service"
+    echo "  restart_service - Restart NestJS service"
     echo "  help            - Display this help message"
 }
 
@@ -170,6 +189,12 @@ case "$1" in
         ;;
     bootstrap_app)
         bootstrap_app
+        ;;
+    stop_service)
+        stop_service
+        ;;
+    restart_service)
+        restart_service
         ;;
     help)
         display_help
