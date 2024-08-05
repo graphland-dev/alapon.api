@@ -8,10 +8,10 @@ services:
       # Only will build production stage from our dockerfile
       # target: production
       target: production
-    # volumes:
+      # volumes:
       # - .:/application
     env_file:
-      - .env.prod
+      - .env.prod.docker
     ports:
       - 4002:4001
     depends_on:

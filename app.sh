@@ -68,15 +68,15 @@ function install_node() {
         echo "Installing Node.js and npm..."
 
         # Use NodeSource to install the latest version of Node.js
-        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-        sudo apt-get install -y nodejs
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+        nvm install 20
 
-        echo "Node.js and npm installed successfully!"
+        echo "Node.js 20 is installed successfully!"
     fi
 }
 
 # Function to setup NestJS Application
-function setup_nestjs() {
+function setup_app() {
     echo "Setting up NestJS application..."
 
     # Check if package.json exists in the current directory
@@ -86,18 +86,54 @@ function setup_nestjs() {
     fi
 
     # Run npm install
-    echo "Running npm install..."
+    echo "------ Backend package.json installation ------"
     npm install
 
     # Build the NestJS application
-    echo "Building the NestJS application..."
+    echo "Building the backend application..."
     npm run build
 
-    # Optionally, run the application
-    echo "Starting the NestJS application..."
-    npm run start:prod
+    echo "------ Client package.json installation ------"
+    cd client
+    npm install
+    
+    echo "Building the client application..."
+    npm run build
+    cd ..
 
-    echo "NestJS application setup and started successfully!"
+    # Write a systemd service file
+    echo "Creating systemd service file for backend application..."
+
+    SERVICE_NAME="blackout-chat"
+
+    # Define the service file content
+    SERVICE_CONTENT="[Unit]
+Description=NestJS Application
+After=network.target
+
+[Service]
+ExecStart=$(which node) $(pwd)/dist/main.js
+WorkingDirectory=$(pwd)
+Restart=always
+User=$USER
+Environment=NODE_ENV=production
+# Optional: Set any required environment variables here
+
+[Install]
+WantedBy=multi-user.target"
+
+    # Write the service file to the systemd directory
+    echo "$SERVICE_CONTENT" | sudo tee /etc/systemd/system/$SERVICE_NAME.service
+
+    # Reload systemd daemon to recognize new service
+    sudo systemctl daemon-reload
+
+    # Enable and start the NestJS service
+    sudo systemctl enable $SERVICE_NAME
+    sudo systemctl start $SERVICE_NAME
+
+    echo "Backout chat application setup as a service and started successfully!"
+    echo "You can check the status with: sudo systemctl status $SERVICE_NAME"
 }
 
 # Display help message
