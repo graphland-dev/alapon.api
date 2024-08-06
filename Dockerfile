@@ -1,14 +1,14 @@
 ######################################
 # Client BUILD FOR PRODUCTION
 ######################################
-# FROM node:22.5.1-alpine3.20 As client-build
-# USER node
-# WORKDIR /application/client-src
-# COPY --chown=node:node ./client/package*.json ./
-# RUN npm i && npm cache clean --force
-# COPY --chown=node:node ./client .
-# # ENV NODE_ENV production
-# RUN npm run build
+FROM node:22.5.1-alpine3.20 As client-build
+USER node
+WORKDIR /application/client-src
+COPY --chown=node:node ./client/package*.json ./
+RUN npm i && npm cache clean --force
+COPY --chown=node:node ./client .
+# ENV NODE_ENV production
+RUN npm run build
 
 
 ###################
@@ -38,7 +38,7 @@ WORKDIR /application
 
 COPY --chown=node:node --from=build /application/node_modules ./node_modules
 COPY --chown=node:node --from=build /application/dist ./dist
-COPY --chown=node:node --from=build /application/client/dist ./client/dist
-# COPY --chown=node:node --from=client-build /application/client-src/dist ./client/dist
+# COPY --chown=node:node --from=build /application/client/dist ./client/dist
+COPY --chown=node:node --from=client-build /application/client-src/dist ./client/dist
 
 CMD [ "node", "dist/main.js" ]
