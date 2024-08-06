@@ -17,7 +17,7 @@ import {
   IconLogout,
 } from '@tabler/icons-react';
 import { useAtomValue } from 'jotai';
-import { clone, unique } from 'radash';
+import { clone } from 'radash';
 import Lottie from 'lottie-react';
 import { useEffect, useState } from 'react';
 import ChatRoomItem from '../../components/ChatRoomItem';
