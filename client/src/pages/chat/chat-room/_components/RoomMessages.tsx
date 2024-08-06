@@ -142,6 +142,7 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
   useEffect(() => {
     // Listen for self message emit
     messageSendByCurrentUserSubject.subscribe((message) => {
+      console.log('self message:', message);
       setMessages((messages) => [...messages, message]);
       setTimeout(() => {
         setVisibleScrollBottom(false);

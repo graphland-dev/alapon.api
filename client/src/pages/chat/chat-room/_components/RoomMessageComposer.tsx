@@ -1,3 +1,4 @@
+import { uid } from 'radash';
 import { ChatMessageType } from '@/common/api-models/graphql';
 import { socketAtom } from '@/common/states/socket-io.atom';
 import { userAtom } from '@/common/states/user.atom';
@@ -42,7 +43,7 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId }) => {
     });
     setMessage('');
     messageSendByCurrentUserSubject.next({
-      _id: window.crypto.randomUUID(),
+      _id: uid(35),
       text: message.trim(),
       chatRoom: { _id: roomId as string },
       messageType: ChatMessageType.UserMessage,
