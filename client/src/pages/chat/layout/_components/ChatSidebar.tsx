@@ -17,7 +17,7 @@ import {
   IconLogout,
 } from '@tabler/icons-react';
 import { useAtomValue } from 'jotai';
-import _ from 'lodash';
+import { clone, unique } from 'radash';
 import Lottie from 'lottie-react';
 import { useEffect, useState } from 'react';
 import ChatRoomItem from '../../components/ChatRoomItem';
@@ -91,7 +91,7 @@ const ChatSidebar = () => {
     });
 
     // Deep clone chatRooms array
-    const chatRoomCloned = _.cloneDeep(chatRooms);
+    const chatRoomCloned = clone(chatRooms);
     console.log('subscribe -> ', `room-list-updated:${authUser?._id}`);
 
     socket.on(
@@ -105,8 +105,7 @@ const ChatSidebar = () => {
           );
         }
 
-        const roomIndex = _.findIndex(
-          chatRoomCloned,
+        const roomIndex = chatRoomCloned.findIndex(
           (room) => room?._id === payload?._id,
         );
 
