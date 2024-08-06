@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   service:
     build:
@@ -13,7 +11,7 @@ services:
     env_file:
       - .env.prod.docker
     ports:
-      - 4002:4001
+      - 4001:4001
     depends_on:
       - mongodb_database
     restart: always

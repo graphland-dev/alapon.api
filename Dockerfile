@@ -38,7 +38,7 @@ WORKDIR /application
 
 COPY --chown=node:node --from=build /application/node_modules ./node_modules
 COPY --chown=node:node --from=build /application/dist ./dist
-COPY --chown=node:node --from=client-build /application/client/dist ./client/dist
+COPY --chown=node:node --from=build /application/client/dist ./client/dist
 # COPY --chown=node:node --from=client-build /application/client-src/dist ./client/dist
 
 CMD [ "node", "dist/main.js" ]
