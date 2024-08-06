@@ -129,7 +129,7 @@ const NoRoomScreen = () => {
       </p>
 
       <div className="text-xs text-center text-slate-500">
-        <p>version 1.0.4</p>
+        <p>version 1.0.5</p>
       </div>
     </div>
   );
