@@ -2,7 +2,6 @@ import { TokenService } from '@/common/utils/TokenService';
 import {
   ControlBar,
   LiveKitRoom,
-  RoomAudioRenderer,
   VideoConference,
 } from '@livekit/components-react';
 import '@livekit/components-styles';

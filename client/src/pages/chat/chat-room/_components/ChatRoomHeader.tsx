@@ -1,6 +1,6 @@
 import { ChatMessage, ChatRoomType } from '@/common/api-models/graphql';
 import { Menu, Skeleton, UnstyledButton } from '@mantine/core';
-import { IconChevronLeft, IconDotsVertical } from '@tabler/icons-react';
+import { IconChevronLeft } from '@tabler/icons-react';
 import { EllipsisVertical, Phone, Video } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
