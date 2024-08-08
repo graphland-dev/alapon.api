@@ -2,12 +2,14 @@ import { uid } from 'radash';
 import { ChatMessageType } from '@/common/api-models/graphql';
 import { socketAtom } from '@/common/states/socket-io.atom';
 import { userAtom } from '@/common/states/user.atom';
-import { UnstyledButton } from '@mantine/core';
-import { IconSend2 } from '@tabler/icons-react';
+import { Popover, UnstyledButton } from '@mantine/core';
+import emojiPickerData from '@emoji-mart/data';
+import EmojiPicker from '@emoji-mart/react';
 
 import { useAtomValue } from 'jotai';
 import React, { useCallback, useRef } from 'react';
-import { messageSendByCurrentUserSubject } from '../utils/chat-controller.rxjs';
+import { messageSendByCurrentUserSubject } from '../../utils/chat-controller.rxjs';
+import { SmilePlus, SendHorizontal } from 'lucide-react';
 
 interface Props {
   roomId: string;
@@ -15,6 +17,8 @@ interface Props {
 
 const RoomMessageComposer: React.FC<Props> = ({ roomId }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [emojiPickerOpened, setEmojiPickerOpened] = React.useState(false);
+
   const socket = useAtomValue(socketAtom);
   const authUser = useAtomValue(userAtom);
   const [message, setMessage] = React.useState('');
@@ -96,15 +100,47 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId }) => {
         rows={1}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+        data-gramm="false"
+        data-gramm_editor="false"
+        data-enable-grammarly="false"
       />
 
-      <UnstyledButton
-        area-label="room-message-composer-button"
-        className="absolute right-2 top-[13px]"
-        onClick={handleSendMessage}
-      >
-        <IconSend2 className="text-slate-500" />
-      </UnstyledButton>
+      <div className="absolute right-2 flex items-center top-[13px] gap-2">
+        <Popover
+          opened={emojiPickerOpened}
+          onChange={setEmojiPickerOpened}
+          styles={{
+            dropdown: {
+              '--mantine-color-white': 'transparent',
+              '--mantine-color-gray-2': 'transparent',
+            },
+          }}
+        >
+          <Popover.Target>
+            <UnstyledButton onClick={() => setEmojiPickerOpened(true)}>
+              <SmilePlus className="text-zinc-600" />
+            </UnstyledButton>
+          </Popover.Target>
+
+          <Popover.Dropdown>
+            <EmojiPicker
+              theme={'light'}
+              data={emojiPickerData}
+              emojiSize={30}
+              onEmojiSelect={(emoji: any) => {
+                setMessage((prevMessage) => prevMessage + emoji.native);
+              }}
+            />
+          </Popover.Dropdown>
+        </Popover>
+
+        <UnstyledButton
+          area-label="room-message-composer-button"
+          onClick={handleSendMessage}
+        >
+          <SendHorizontal className="text-zinc-600" />
+        </UnstyledButton>
+      </div>
     </div>
   );
 };
