@@ -16,6 +16,8 @@
     "@emoji-mart/react": "^1.1.1",
     "@hookform/error-message": "^2.0.1",
     "@hookform/resolvers": "^3.9.0",
+    "@livekit/components-react": "^2.4.3",
+    "@livekit/components-styles": "^1.0.12",
     "@mantine/core": "^7.11.2",
     "@mantine/dropzone": "^7.11.2",
     "@mantine/hooks": "^7.11.2",

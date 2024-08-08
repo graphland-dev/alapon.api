@@ -1,6 +1,7 @@
 import { ChatMessage, ChatRoomType } from '@/common/api-models/graphql';
-import { Menu, Skeleton } from '@mantine/core';
+import { Menu, Skeleton, UnstyledButton } from '@mantine/core';
 import { IconChevronLeft, IconDotsVertical } from '@tabler/icons-react';
+import { EllipsisVertical, Phone, Video } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -52,16 +53,24 @@ const ChatRoomHeader: React.FC<Props> = ({
         </div>
 
         {/* Room Action Menu */}
-        <Menu>
-          <Menu.Target>
-            <button className="btn btn-ghost btn-circle">
-              <IconDotsVertical size={18} />
-            </button>
-          </Menu.Target>
-          <Menu.Dropdown>
-            {/* <Menu.Item onClick={handleLeaveChat}>Leave chat</Menu.Item> */}
-          </Menu.Dropdown>
-        </Menu>
+        <div className="flex items-center gap-3">
+          <UnstyledButton>
+            <Video className="text-zinc-600" size={25} />
+          </UnstyledButton>
+          <UnstyledButton>
+            <Phone className="text-zinc-600" />
+          </UnstyledButton>
+          <Menu>
+            <Menu.Target>
+              <button className="btn btn-ghost btn-circle">
+                <EllipsisVertical size={25} />
+              </button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              {/* <Menu.Item onClick={handleLeaveChat}>Leave chat</Menu.Item> */}
+            </Menu.Dropdown>
+          </Menu>
+        </div>
       </div>
     </div>
   );

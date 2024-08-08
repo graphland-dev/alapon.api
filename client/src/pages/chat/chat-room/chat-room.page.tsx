@@ -7,6 +7,7 @@ import RoomMessageComposer from './_components/ChatComposer/RoomMessageComposer'
 import ChatRoomHeader from './_components/ChatRoomHeader';
 import RoomMessagesTrack from './_components/RoomMessagesTrack';
 import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
+import ChatRoomCall from './_components/ChatRoomCall';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
@@ -48,6 +49,8 @@ const ChatRoomPage = () => {
   //     },
   //   });
   // };
+
+  return <ChatRoomCall roomId={patams.roomId!} />;
 
   return (
     <div className="flex flex-col justify-between h-full">
