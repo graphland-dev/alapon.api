@@ -3,16 +3,24 @@ import {
   ChatMessagesWithPagination,
 } from '@/common/api-models/graphql';
 import { socketAtom } from '@/common/states/socket-io.atom';
-import { gql, useLazyQuery } from '@apollo/client';
+import { gql, useLazyQuery, useQuery } from '@apollo/client';
+import { LoadingOverlay } from '@mantine/core';
 import { useAtomValue } from 'jotai';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { messageSendByCurrentUserSubject } from '../utils/chat-controller.rxjs';
 import CharRoomMessage from './ChatRoomMessage';
-import { LoadingOverlay } from '@mantine/core';
+import UnreadMessagesAlert from './UnreadMessagesAlert';
+import { useCounter } from '@mantine/hooks';
+import Spinner from '@/common/components/Spinner';
+import LoadMoreButton from './LoadMoreButton';
 
 const ROOM_MESSAGES_QUERY = gql`
   query Chat__roomMessages($roomId: String!, $where: CommonPaginationOnlyDto) {
     chat__roomMessages(roomId: $roomId, where: $where) {
+      meta {
+        totalCount
+        hasNextPage
+      }
       nodes {
         _id
         messageType
@@ -37,12 +45,14 @@ interface Props {
   onMyMessageArrived?: () => void;
 }
 
-const RoomMessages: React.FC<Props> = ({ roomId }) => {
-  // console.log('Rendering RoomMessages');
+const RoomMessagesTrack: React.FC<Props> = ({ roomId }) => {
   const socket = useAtomValue(socketAtom);
+  const [messagesPageIndex, messagesPageIndexHandler] = useCounter(1);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [visibleScrollBottom, setVisibleScrollBottom] = useState(false);
+
+  const messagesTrackRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = (isSmooth = true) => {
     // const timelineDivHeight =
@@ -57,7 +67,7 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
       ?.scrollIntoView({ behavior: isSmooth ? 'smooth' : 'auto' });
   };
 
-  const [fetchRoomMessages, fetchRoomMessagesState] = useLazyQuery<{
+  const roomMessagesQuery = useQuery<{
     chat__roomMessages: ChatMessagesWithPagination;
   }>(ROOM_MESSAGES_QUERY, {
     variables: {
@@ -65,25 +75,31 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
       where: {
         sortBy: 'createdAt',
         sort: 'DESC',
-        limit: 100,
+        limit: 20,
+        page: messagesPageIndex,
       },
     },
     fetchPolicy: 'network-only',
     notifyOnNetworkStatusChange: true,
     onCompleted: (data) => {
+      console.log(data.chat__roomMessages.nodes?.map((m) => m.text).join('\n'));
       const apiReversedMessages = [...data.chat__roomMessages.nodes!].reverse();
-      // const apiReversedMessages = [...data.chat__roomMessages.nodes!];
-      setMessages((messages) => [...messages, ...apiReversedMessages]);
+      setMessages((messages) => [...apiReversedMessages, ...messages]);
       setTimeout(() => {
-        scrollToBottom(false);
+        if (messagesPageIndex === 1) {
+          scrollToBottom(false);
+        }
       });
     },
   });
 
   useEffect(() => {
     if (!roomId) return;
+
+    // Join room
     socket.emit(`join-room`, roomId);
-    const handleMessage = (message: ChatMessage) => {
+
+    const handleSocketNewMessages = (message: ChatMessage) => {
       const audio = new Audio('/chat.mp3');
       audio.play();
       document.title = `New Message - ${message.createdBy?.handle}`;
@@ -107,18 +123,6 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
             ?.offsetHeight || 0;
 
         const scrollDistance = scrollHeight - scrollTop - offsetHeight;
-        // console.log('-----------');
-        // console.log('scrollHeight', scrollHeight);
-        // console.log('scrollTop', scrollTop);
-        // console.log('scrollDistance', scrollDistance);
-        // console.log(
-        //   'offsetTop',
-        //   document.getElementById('chat-room-messages-timeline')?.offsetTop,
-        // );
-        // console.log(
-        //   'offsetHeight',
-        //   document.getElementById('chat-room-messages-timeline')?.offsetHeight,
-        // );
 
         if (scrollDistance < 1000) {
           scrollToBottom();
@@ -129,20 +133,29 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
       });
     };
 
-    socket.on(`room-messages:${roomId}`, handleMessage);
+    socket.on(`room-messages:${roomId}`, handleSocketNewMessages);
 
-    fetchRoomMessages();
+    // messagesTrackRef.current?.addEventListener('scroll', function (e) {
+    //   const target = e.target as HTMLDivElement;
+    //   if (target.scrollTop === 0) {
+    //     // alert(messagesPageIndex);
+    //     //   messagesPageIndexHandler.increment();
+    //   }
+    // });
+
     return () => {
       socket.emit(`leave-room`, roomId);
       socket.off(`room-messages:${roomId}`);
       setMessages([]);
+      setTimeout(() => {
+        messagesPageIndexHandler.set(1);
+      });
     };
   }, [roomId]);
 
   useEffect(() => {
     // Listen for self message emit
     messageSendByCurrentUserSubject.subscribe((message) => {
-      // console.log('self message:', message);
       setMessages((messages) => [...messages, message]);
       setTimeout(() => {
         setVisibleScrollBottom(false);
@@ -155,20 +168,27 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
     <div
       className="relative flex flex-col flex-auto gap-2 px-2 overflow-y-auto"
       id="chat-room-messages-timeline"
+      ref={messagesTrackRef}
     >
-      <LoadingOverlay visible={fetchRoomMessagesState.loading} />
+      <UnreadMessagesAlert
+        unreadMessagesCount={unreadMessagesCount}
+        visible={visibleScrollBottom}
+        onClick={() => {
+          setUnreadMessagesCount(0);
+          setVisibleScrollBottom(false);
+          scrollToBottom();
+        }}
+      />
 
-      {visibleScrollBottom && (
-        <button
+      {roomMessagesQuery.data?.chat__roomMessages.meta?.hasNextPage ? (
+        <LoadMoreButton
+          loading={roomMessagesQuery.loading}
           onClick={() => {
-            setUnreadMessagesCount(0);
-            setVisibleScrollBottom(false);
-            scrollToBottom();
+            messagesPageIndexHandler.increment();
           }}
-          className="fixed flex items-center bottom-[80px] -translate-x-[50%] right-[10px] z-50 bg-green-500 text-primary-foreground px-4 rounded-sm shadow-lg"
-        >
-          <p>New Message ({unreadMessagesCount})</p>
-        </button>
+        />
+      ) : (
+        <div className="flex-1" />
       )}
 
       {messages!.map((message) => (
@@ -183,4 +203,4 @@ const RoomMessages: React.FC<Props> = ({ roomId }) => {
   );
 };
 
-export default RoomMessages;
+export default RoomMessagesTrack;

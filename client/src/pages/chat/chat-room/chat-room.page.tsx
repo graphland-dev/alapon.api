@@ -8,11 +8,12 @@ import { IconChevronLeft, IconDotsVertical } from '@tabler/icons-react';
 import { useAtomValue } from 'jotai';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import RoomMessageComposer from './_components/RoomMessageComposer';
-import RoomMessages from './_components/RoomMessages';
+import RoomMessagesTrack from './_components/RoomMessagesTrack';
 import {
   CHAT_ROOM_DETAILS_QUERY,
   LEAVE_CHAT_ROOM_MUTATION,
 } from './utils/query';
+import ChatRoomHeader from './_components/ChatRoomHeader';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
@@ -58,57 +59,14 @@ const ChatRoomPage = () => {
   return (
     <div className="flex flex-col justify-between h-full">
       {/* Top Bar */}
-      <div className="px-2 py-2 bg-white h-[65px] flex-none shadow-sm">
-        <div className="flex items-center justify-between gap-1">
-          {/* Left Side */}
-          <div className="flex items-center gap-1">
-            <Link to={`/chat`} className="md:hidden">
-              <IconChevronLeft />
-            </Link>
-
-            <div className="flex flex-col gap-1">
-              {loading ? (
-                <>
-                  <Skeleton height={20} width={200} />
-                  <Skeleton height={10} width={100} />
-                </>
-              ) : (
-                <>
-                  <p className="text-md">@{getHandleName()}</p>
-                  {chatRoomData?.chat__chatRoom.roomType ===
-                  ChatRoomType.Group ? (
-                    <p className="text-xs">
-                      {chatRoomData?.chat__chatRoom?.members?.length} members
-                    </p>
-                  ) : (
-                    <p className="text-xs">
-                      Last message sent at{' '}
-                      {new Date(
-                        chatRoomData?.chat__chatRoom.updatedAt,
-                      ).toDateString()}
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Room Action Menu */}
-          <Menu>
-            <Menu.Target>
-              <button className="btn btn-ghost btn-circle">
-                <IconDotsVertical size={18} />
-              </button>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item onClick={handleLeaveChat}>Leave chat</Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </div>
-      </div>
+      <ChatRoomHeader
+        roomHandle={getHandleName() || ''}
+        roomId={patams.roomId || ''}
+        loading={loading}
+      />
 
       {/* Chat Room Messages timeline */}
-      <RoomMessages roomId={patams.roomId!} />
+      <RoomMessagesTrack roomId={patams.roomId!} />
 
       {/* Input area */}
       <div className="flex-none p-2 pt-0 shadow-md">
