@@ -3,16 +3,14 @@ import {
   ChatMessagesWithPagination,
 } from '@/common/api-models/graphql';
 import { socketAtom } from '@/common/states/socket-io.atom';
-import { gql, useLazyQuery, useQuery } from '@apollo/client';
-import { LoadingOverlay } from '@mantine/core';
+import { gql, useQuery } from '@apollo/client';
+import { useCounter } from '@mantine/hooks';
 import { useAtomValue } from 'jotai';
 import { useEffect, useRef, useState } from 'react';
 import { messageSendByCurrentUserSubject } from '../utils/chat-controller.rxjs';
 import CharRoomMessage from './ChatRoomMessage';
-import UnreadMessagesAlert from './UnreadMessagesAlert';
-import { useCounter } from '@mantine/hooks';
-import Spinner from '@/common/components/Spinner';
 import LoadMoreButton from './LoadMoreButton';
+import UnreadMessagesAlert from './UnreadMessagesAlert';
 
 const ROOM_MESSAGES_QUERY = gql`
   query Chat__roomMessages($roomId: String!, $where: CommonPaginationOnlyDto) {
