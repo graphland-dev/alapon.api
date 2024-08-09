@@ -1,18 +1,18 @@
 import { ChatRoom, ChatRoomType } from '@/common/api-models/graphql';
+import { socketAtom } from '@/common/states/socket-io.atom';
 import { userAtom } from '@/common/states/user.atom';
 import { useQuery } from '@apollo/client';
 import { Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useAtomValue } from 'jotai';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import RoomMessageComposer from './_components/ChatComposer/RoomMessageComposer';
 import ChatRoomHeader from './_components/ChatRoomHeader';
 import JoinCallModal from './_components/JoinCallModal';
 import RoomMessagesTrack from './_components/RoomMessagesTrack';
-import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
-import { useEffect } from 'react';
-import { socketAtom } from '@/common/states/socket-io.atom';
 import { ISendOrUpdateMessageSocketDto } from './models/chat.model';
+import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
