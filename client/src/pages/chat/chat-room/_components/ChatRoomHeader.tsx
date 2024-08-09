@@ -1,8 +1,9 @@
 import { ChatMessage, ChatRoomType } from '@/common/api-models/graphql';
-import { Menu, Skeleton, UnstyledButton } from '@mantine/core';
+import { Menu, Skeleton, Tooltip } from '@mantine/core';
 import { IconChevronLeft } from '@tabler/icons-react';
-import { EllipsisVertical, Phone, Video } from 'lucide-react';
+import { EllipsisVertical, Phone, PhoneOutgoing, Video } from 'lucide-react';
 import React from 'react';
+
 import { Link } from 'react-router-dom';
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
   chatRoomType?: ChatRoomType;
   lastMessage?: ChatMessage;
   memberCount?: number;
+  isCallOngoing?: boolean;
+  onClickJoinCall?: () => void;
 }
 
 const ChatRoomHeader: React.FC<Props> = ({
@@ -20,6 +23,9 @@ const ChatRoomHeader: React.FC<Props> = ({
   chatRoomType,
   memberCount,
   lastMessage,
+  roomId,
+  isCallOngoing,
+  onClickJoinCall,
 }) => {
   return (
     <div className="px-2 py-2 bg-white h-[65px] flex-none shadow-sm">
@@ -53,24 +59,42 @@ const ChatRoomHeader: React.FC<Props> = ({
         </div>
 
         {/* Room Action Menu */}
-        <div className="flex items-center gap-3">
-          <UnstyledButton>
-            <Video className="text-zinc-600" size={25} />
-          </UnstyledButton>
-          <UnstyledButton>
-            <Phone className="text-zinc-600" />
-          </UnstyledButton>
-          <Menu>
-            <Menu.Target>
-              <button className="btn btn-ghost btn-circle">
-                <EllipsisVertical size={25} />
+        {isCallOngoing ? (
+          <div className="flex items-center gap-3">
+            <Tooltip label="Join Call">
+              <button
+                onClick={onClickJoinCall}
+                className="flex items-center gap-2 px-2 py-1 text-white bg-green-500 rounded-sm"
+              >
+                <PhoneOutgoing size={18} />
+                <p>Join Call</p>
               </button>
-            </Menu.Target>
-            <Menu.Dropdown>
-              {/* <Menu.Item onClick={handleLeaveChat}>Leave chat</Menu.Item> */}
-            </Menu.Dropdown>
-          </Menu>
-        </div>
+            </Tooltip>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Tooltip label="Join Video Call">
+              <Link to={`/chat/${roomId}/video-call`}>
+                <Video className="text-zinc-600" size={25} />
+              </Link>
+            </Tooltip>
+            <Tooltip label="Join Audio Call">
+              <Link to={`/chat/${roomId}/audio-call`}>
+                <Phone className="text-zinc-600" />
+              </Link>
+            </Tooltip>
+            <Menu>
+              <Menu.Target>
+                <button className="btn btn-ghost btn-circle">
+                  <EllipsisVertical size={25} />
+                </button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                {/* <Menu.Item onClick={handleLeaveChat}>Leave chat</Menu.Item> */}
+              </Menu.Dropdown>
+            </Menu>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { SocketIoModule } from './socket.io/socket.io.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { LivekitModule } from './api/livekit/livekit.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     AuthorizationModule,
     ChatModule,
     SocketIoModule,
+    LivekitModule,
   ],
   controllers: [AppController],
   providers: [AppResolver],

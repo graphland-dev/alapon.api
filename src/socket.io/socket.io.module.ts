@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
-import { SocketIoController } from './socket.io.controller';
+import { forwardRef, Module } from '@nestjs/common';
 import { SocketIoGateway } from './socket.io.gateway';
-import { SocketIoService } from './socket.io.service';
+import { SocketChatService } from './socket-chat.service';
+import { ChatRoomModule } from '@/api/chat/chat-room/chat-room.module';
 
 @Module({
-  providers: [SocketIoGateway, SocketIoService],
-  controllers: [SocketIoController],
+  imports: [forwardRef(() => ChatRoomModule)],
+  providers: [SocketIoGateway, SocketChatService],
   exports: [SocketIoGateway],
 })
 export class SocketIoModule {}

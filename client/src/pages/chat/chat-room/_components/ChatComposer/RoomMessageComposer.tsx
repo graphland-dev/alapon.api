@@ -10,6 +10,7 @@ import { useAtomValue } from 'jotai';
 import React, { useCallback, useRef } from 'react';
 import { messageSendByCurrentUserSubject } from '../../utils/chat-controller.rxjs';
 import { SmilePlus, SendHorizontal } from 'lucide-react';
+import { ISendOrUpdateMessageSocketDto } from '../../models/chat.model';
 
 interface Props {
   roomId: string;
@@ -39,12 +40,12 @@ const RoomMessageComposer: React.FC<Props> = ({ roomId }) => {
   const handleSendMessage = () => {
     if (!message) return;
 
-    socket.emit(`send-room-message`, {
+    socket.emit(`emit:chat:messages:send-message`, {
       roomId: roomId,
       messageText: message.trim(),
       userId: authUser?._id,
       userHandle: authUser?.handle,
-    });
+    } as ISendOrUpdateMessageSocketDto);
     setMessage('');
     messageSendByCurrentUserSubject.next({
       _id: uid(35),

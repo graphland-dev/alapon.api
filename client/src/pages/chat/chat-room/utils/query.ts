@@ -7,6 +7,7 @@ export const CHAT_ROOM_DETAILS_QUERY = gql`
       handle
       isNsfw
       roomType
+      isOngoingCall
       owner {
         _id
         handle

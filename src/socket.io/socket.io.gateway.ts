@@ -1,6 +1,4 @@
-import { ChatMessageType } from '@/api/chat/chat-message/entities/chat-message.entity';
 import { Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   ConnectedSocket,
   MessageBody,
@@ -10,8 +8,10 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import mongoose from 'mongoose';
 import { Namespace, Socket } from 'socket.io';
+import { SocketChatService } from './socket-chat.service';
+import { ISendOrUpdateMessageSocketDto } from './dtos/socket.dto';
+import { ChatMessageType } from '@/api/chat/chat-message/entities/chat-message.entity';
 
 @WebSocketGateway({
   namespace: 'socket',
@@ -26,7 +26,7 @@ export class SocketIoGateway
   public io: Namespace;
   private logger: Logger = new Logger('SocketGateway');
 
-  constructor(private eventEmitter: EventEmitter2) {}
+  constructor(private socketChatService: SocketChatService) {}
 
   handleDisconnect(client: Socket) {
     this.logger.debug(`Client disconnected: ${client.id}`);
@@ -41,37 +41,94 @@ export class SocketIoGateway
     this.logger.debug(`Client connected: ${this.io.sockets.size}`);
   }
 
-  @SubscribeMessage('join-room')
-  handleJoinRoom(client: Socket, roomId: string): void {
-    client.join(roomId);
-    console.log(`Client ${client.id} joined room: ${roomId}`);
-  }
+  // -------------------------------- Chat Room Events --------------------------------
 
-  @SubscribeMessage('leave-room')
-  handleLeaveRoom(client: Socket, roomId: string): void {
-    client.leave(roomId);
-    console.log(`Client ${client.id} left room: ${roomId}`);
-  }
-
-  @SubscribeMessage('join-socket')
-  loginUser(
+  @SubscribeMessage('emit:chat:join-room')
+  handle__emit__chat__joinRoom(
     @MessageBody()
-    data: { userId: string },
+    data: { roomId: string },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    socket.join(data.roomId);
+    console.log(`Client ${socket.id} joined room: ${data.roomId}`);
+  }
+
+  @SubscribeMessage('emit:chat:leave-room')
+  handle__emit__chat__leaveRoom(
+    @MessageBody()
+    data: { roomId: string },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    socket.leave(data.roomId);
+    console.log(`Client ${socket.id} leave room: ${data.roomId}`);
+  }
+
+  @SubscribeMessage('emit:chat:messages:send-message')
+  // 🔌 -> 📢 `listen:chat:{roomId}:messages`
+  handle__emit__chat__messages__sendMessage(
+    @MessageBody()
+    data: ISendOrUpdateMessageSocketDto,
     @ConnectedSocket() socket: Socket,
   ): void {
-    socket.join(`user:${data.userId}`);
-    this.logger.debug(`join-socket -> userId:${data.userId}`);
+    this.logger.debug(
+      'emit:chat:messages:send-message',
+      JSON.stringify({ data }),
+    );
+    this.socketChatService.sendMessageToChatRoom(socket, {
+      ...data,
+      messageType: ChatMessageType.USER_MESSAGE,
+    });
   }
 
-  @SubscribeMessage('leave-socket')
-  logoutUser(
+  @SubscribeMessage('emit:chat:messages:update-message')
+  // 🔌 -> 📢 `listen:chat:{roomId}:messages:updated`
+  handle__emit__chat__messages__updateMessage(
     @MessageBody()
-    data: { userId: string },
+    data: ISendOrUpdateMessageSocketDto,
     @ConnectedSocket() socket: Socket,
   ): void {
-    socket.leave(`user:${data.userId}`);
-    this.logger.debug(`leave-socket -> userId:${data.userId}`);
+    this.logger.debug(
+      'emit:chat:messages:update-message',
+      JSON.stringify({ data }),
+    );
+    this.socketChatService.updateMessageToChatRoom(socket, data);
   }
+
+  @SubscribeMessage('emit:chat:initiate-call')
+  // 🔌 -> 📢 listen:chat:{roomId}:call-incoming
+  async handle__emit__chat__callOutgoing(
+    @MessageBody()
+    data: ISendOrUpdateMessageSocketDto,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void> {
+    this.logger.debug('emit:chat:initiate-call', JSON.stringify({ data }));
+    await this.socketChatService.changeRoomOngoinCallStatus(socket, {
+      ...data,
+      isOngoingCall: true,
+    });
+  }
+
+  // // --------------------------------------------------------------------------------
+
+  // @SubscribeMessage('join-socket')
+  // loginUser(
+  //   @MessageBody()
+  //   data: { userId: string },
+  //   @ConnectedSocket() socket: Socket,
+  // ): void {
+  //   socket.join(`user:${data.userId}`);
+  //   this.logger.debug(`join-socket -> userId:${data.userId}`);
+  // }
+
+  // @SubscribeMessage('leave-socket')
+  // logoutUser(
+  //   @MessageBody()
+  //   data: { userId: string },
+  //   @ConnectedSocket() socket: Socket,
+  // ): void {
+  //   socket.leave(`user:${data.userId}`);
+  //   this.logger.debug(`leave-socket -> userId:${data.userId}`);
+  // }
 
   /**
    * Send message to user
@@ -86,60 +143,6 @@ export class SocketIoGateway
         message,
       )}`,
     );
-  }
-
-  async sendMessageToSocketClients(
-    clientIds: string[],
-    eventName: string,
-    message: string,
-  ) {
-    this.io.to(clientIds).emit(eventName, message);
-    this.logger.debug(
-      `Message send to user: ${clientIds} -> ${JSON.stringify(clientIds)}`,
-    );
-  }
-
-  @SubscribeMessage('send-room-message')
-  async handleSendRoomMessage(
-    @MessageBody()
-    data: {
-      roomId: string;
-      userId: string;
-      messageText: string;
-      userHandle: string;
-    },
-    @ConnectedSocket() socket: Socket,
-  ) {
-    const msgId = new mongoose.Types.ObjectId().toString();
-    const time = new Date().toISOString();
-
-    socket.broadcast.to(data.roomId).emit(`room-messages:${data.roomId}`, {
-      _id: msgId,
-      messageType: ChatMessageType.USER_MESSAGE,
-      createdBy: {
-        handle: data.userHandle,
-        _id: data.userId,
-      },
-      chatRoom: {
-        _id: data.roomId,
-      },
-      text: data.messageText,
-      createdAt: time,
-      updatedAt: time,
-    });
-
-    this.eventEmitter.emit('message-send-to-room', {
-      _id: msgId,
-      messageType: 'USER_MESSAGE',
-      text: data.messageText,
-      createdBy: {
-        handle: data.userHandle,
-        _id: data.userId,
-      },
-      chatRoom: data.roomId,
-      createdAt: time,
-      updatedAt: time,
-    });
   }
 
   /**

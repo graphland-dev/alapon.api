@@ -34,6 +34,7 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
     private readonly userService: UserService,
     @Inject(forwardRef(() => ChatMessageService))
     public readonly chatMessageService: ChatMessageService,
+    @Inject(forwardRef(() => SocketIoGateway))
     private readonly socketIoGateway: SocketIoGateway,
   ) {
     super(chatRoomModel);
@@ -299,46 +300,6 @@ export class ChatRoomService extends BaseDatabaseRepository<ChatRoom> {
       throw new ForbiddenException('You are not belong to this group');
     }
   }
-
-  // async removeMembersFromGroup(
-  //   input: GroupMemberMutationInput,
-  //   user: IAuthUser,
-  // ) {
-  //   const _room = await this.chatRoomModel.findOne({
-  //     handle: slugify(input.groupHandle),
-  //     roomType: ChatRoomType.GROUP,
-  //   });
-
-  //   if (!_room) throw new NotFoundException('Invalid group handle');
-
-  //   if (
-  //     _room.owner.toString() == user.sub ||
-  //     _room.moderators
-  //       .map((moderator) => moderator.toString())
-  //       .includes(user.sub)
-  //   ) {
-  //     const handleUsers = await this.userService.userModel
-  //       .find({
-  //         handle: { $in: input.memberHandles },
-  //       })
-  //       .select('_id');
-
-  //     const res = await this.chatRoomModel.updateOne(
-  //       { handle: slugify(input.groupHandle) },
-  //       {
-  //         $pullAll: {
-  //           members: { $each: handleUsers.map((user) => user._id) },
-  //         },
-  //       },
-  //     );
-  //     // TODO: send system message to room
-  //     return res.modifiedCount > 0;
-  //   } else {
-  //     throw new ForbiddenException(
-  //       'You are not the owner/moderator of this group',
-  //     );
-  //   }
-  // }
 
   async unKickGroupMembers(input: GroupMemberMutationInput, user: IAuthUser) {
     const _room = await this.chatRoomModel.findOne({

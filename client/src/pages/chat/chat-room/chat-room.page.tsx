@@ -1,18 +1,22 @@
 import { ChatRoom, ChatRoomType } from '@/common/api-models/graphql';
 import { userAtom } from '@/common/states/user.atom';
 import { useQuery } from '@apollo/client';
+import { Modal } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { useAtomValue } from 'jotai';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import RoomMessageComposer from './_components/ChatComposer/RoomMessageComposer';
 import ChatRoomHeader from './_components/ChatRoomHeader';
+import JoinCallModal from './_components/JoinCallModal';
 import RoomMessagesTrack from './_components/RoomMessagesTrack';
 import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
-import ChatRoomCall from './_components/ChatRoomCall';
+import { useEffect } from 'react';
+import { socketAtom } from '@/common/states/socket-io.atom';
+import { ISendOrUpdateMessageSocketDto } from './models/chat.model';
 
 const ChatRoomPage = () => {
   const patams = useParams<{ roomId: string }>();
-  // const navigate = useNavigate();
-  const authUser = useAtomValue(userAtom);
+  const socket = useAtomValue(socketAtom);
 
   const { data: chatRoomData, loading } = useQuery<{
     chat__chatRoom: ChatRoom;
@@ -20,6 +24,13 @@ const ChatRoomPage = () => {
     skip: patams.roomId === undefined,
     variables: { roomId: patams.roomId },
   });
+
+  const [joinCallModalOpened, joinCallModalOpenedHandler] =
+    useDisclosure(false);
+
+  const authUser = useAtomValue(userAtom);
+
+  const [isCallOngoing, isCallOngoingHandler] = useDisclosure(false);
 
   // const [leaveChatRoom] = useMutation(LEAVE_CHAT_ROOM_MUTATION, {
   //   onCompleted() {
@@ -50,25 +61,48 @@ const ChatRoomPage = () => {
   //   });
   // };
 
-  return <ChatRoomCall roomId={patams.roomId!} />;
+  useEffect(() => {
+    socket.on(
+      `listen:chat:${patams.roomId}:call-incoming`,
+      (data: ISendOrUpdateMessageSocketDto) => {
+        console.log('listen:chat:${patams.roomId}:call-incoming', data);
+        isCallOngoingHandler.open();
+        joinCallModalOpenedHandler.open();
+      },
+    );
+
+    if (chatRoomData?.chat__chatRoom.isOngoingCall) {
+      isCallOngoingHandler.open();
+    }
+  }, [chatRoomData?.chat__chatRoom.isOngoingCall]);
 
   return (
-    <div className="flex flex-col justify-between h-full">
-      {/* Top Bar */}
-      <ChatRoomHeader
-        roomHandle={getHandleName() || ''}
-        roomId={patams.roomId || ''}
-        loading={loading}
-      />
+    <>
+      <div className="flex flex-col justify-between h-full">
+        {/* Top Bar */}
+        <ChatRoomHeader
+          roomHandle={getHandleName() || ''}
+          roomId={patams.roomId || ''}
+          loading={loading}
+          isCallOngoing={isCallOngoing}
+          onClickJoinCall={joinCallModalOpenedHandler.open}
+        />
 
-      {/* Chat Room Messages timeline */}
-      <RoomMessagesTrack roomId={patams.roomId!} />
+        {/* Chat Room Messages timeline */}
+        <RoomMessagesTrack roomId={patams.roomId!} />
 
-      {/* Input area */}
-      <div className="flex-none p-2 pt-0 shadow-md">
-        <RoomMessageComposer roomId={patams.roomId!} />
+        {/* Input area */}
+        <div className="flex-none p-2 pt-0 shadow-md">
+          <RoomMessageComposer roomId={patams.roomId!} />
+        </div>
       </div>
-    </div>
+      <Modal
+        opened={joinCallModalOpened}
+        onClose={joinCallModalOpenedHandler.close}
+      >
+        <JoinCallModal roomId={patams.roomId!} />
+      </Modal>
+    </>
   );
 };
 

@@ -95,7 +95,7 @@ const RoomMessagesTrack: React.FC<Props> = ({ roomId }) => {
     if (!roomId) return;
 
     // Join room
-    socket.emit(`join-room`, roomId);
+    socket.emit(`emit:chat:join-room`, { roomId });
 
     const handleSocketNewMessages = (message: ChatMessage) => {
       const audio = new Audio('/chat.mp3');
@@ -131,19 +131,11 @@ const RoomMessagesTrack: React.FC<Props> = ({ roomId }) => {
       });
     };
 
-    socket.on(`room-messages:${roomId}`, handleSocketNewMessages);
-
-    // messagesTrackRef.current?.addEventListener('scroll', function (e) {
-    //   const target = e.target as HTMLDivElement;
-    //   if (target.scrollTop === 0) {
-    //     // alert(messagesPageIndex);
-    //     //   messagesPageIndexHandler.increment();
-    //   }
-    // });
+    socket.on(`listen:chat:${roomId}:messages`, handleSocketNewMessages);
 
     return () => {
-      socket.emit(`leave-room`, roomId);
-      socket.off(`room-messages:${roomId}`);
+      socket.emit(`emit:chat:leave-room`, { roomId });
+      socket.off(`listen:chat:${roomId}:messages`);
       setMessages([]);
       setTimeout(() => {
         messagesPageIndexHandler.set(1);

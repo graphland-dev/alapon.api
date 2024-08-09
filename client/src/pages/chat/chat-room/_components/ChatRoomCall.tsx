@@ -9,9 +9,19 @@ import { useEffect, useState } from 'react';
 
 interface Props {
   roomId: string;
+  joinWithAudio: boolean;
+  joinWithVideo: boolean;
+  onLeave?: () => void;
+  onJoin?: () => void;
 }
 
-const ChatRoomCall: React.FC<Props> = ({ roomId }) => {
+const ChatRoomCall: React.FC<Props> = ({
+  roomId,
+  joinWithAudio,
+  joinWithVideo,
+  onLeave,
+  onJoin,
+}) => {
   const [livekitToken, setLivekitToken] = useState<string | undefined>();
 
   useEffect(() => {
@@ -37,10 +47,16 @@ const ChatRoomCall: React.FC<Props> = ({ roomId }) => {
 
   return (
     <LiveKitRoom
-      video={true}
-      audio={true}
+      video={joinWithVideo}
+      audio={joinWithAudio}
       token={livekitToken}
-      serverUrl={'wss://blackout-yn0q8mza.livekit.cloud'}
+      onConnected={() => {
+        onJoin?.();
+      }}
+      onDisconnected={() => {
+        onLeave?.();
+      }}
+      serverUrl={import.meta.env.VITE_LIKEKIT_WEB_SOCKET}
       data-lk-theme="default"
       style={{ height: '100dvh' }}
     >

@@ -1,7 +1,7 @@
 import { IAuthUser } from '@/authorization/decorators/user.decorator';
 import { BaseDatabaseRepository } from '@/common/database/BaseDatabaseRepository';
 import { CommonPaginationOnlyDto } from '@/common/dto/CommonPaginationDto';
-import { SocketIoGateway } from '@/socket.io/socket.io.gateway';
+import { ISendOrUpdateMessageSocketDto } from '@/socket.io/dtos/socket.dto';
 import {
   ForbiddenException,
   forwardRef,
@@ -10,13 +10,12 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChatRoomService } from '../chat-room/chat-room.service';
 import { CreateChatMessageInput } from './dto/chat-message.input';
 import { ChatMessage, ChatMessageType } from './entities/chat-message.entity';
-import { OnEvent } from '@nestjs/event-emitter';
-import { RoomListUpdatedSocketEvent } from '@/socket.io/contracts/RoomListUpdatedSocketEvent';
 
 @Injectable()
 export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
@@ -26,7 +25,6 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
     public readonly chatMessageModel: Model<ChatMessage>,
     @Inject(forwardRef(() => ChatRoomService))
     public readonly chatRoomService: ChatRoomService,
-    private readonly socketIoGateway: SocketIoGateway,
   ) {
     super(chatMessageModel);
   }
@@ -59,10 +57,10 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
     );
 
     // Send message to socket channel
-    await this.socketIoGateway.broadCastMessage(
-      `room-messages:${input.roomId}`,
-      message,
-    );
+    // await this.socketIoGateway.broadCastMessage(
+    //   `room-messages:${input.roomId}`,
+    //   message,
+    // );
 
     return message;
   }
@@ -100,63 +98,49 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
     );
   }
 
-  @OnEvent('message-send-to-room')
-  async handleSaveMessageEvent(payload: any) {
-    // this.eventEmitter.emit('message-send-to-room', {
-    //   _id: msgId,
-    //   messageType: 'USER_MESSAGE',
-    //   text: data.messageText,
-    //   createdBy: data.userId,
-    //   chatRoom: data.roomId,
-    //   createdAt: time,
-    //   updatedAt: time,
-    // });
-    this.logger.debug('Storing socket message to database', payload);
-    const createdMessage = await this.chatMessageModel.create(payload);
+  @OnEvent('chatroom:messages:sync')
+  async handleSaveMessageEvent(payload: ISendOrUpdateMessageSocketDto) {
+    this.logger.debug('Syncing socket message to database', payload);
+    if (payload.messageId) {
+      this.logger.debug('Updating message', payload);
+      const _msg = await this.chatMessageModel.findOne({
+        _id: payload.messageId,
+      });
+      if (!_msg) throw new NotFoundException('Invalid message id');
 
-    const _room = await this.chatRoomService.chatRoomModel
-      .findOne({
-        _id: payload.chatRoom,
-      })
-      .populate('members');
+      await this.chatMessageModel.updateOne(
+        { _id: payload.messageId },
+        {
+          $set: {
+            text: payload.messageText,
+            createdBy: payload?.userId,
+            chatRoom: payload?.roomId,
+            messageType: payload?.messageType || ChatMessageType.USER_MESSAGE,
+          },
+        },
+      );
+    } else {
+      this.logger.debug('Creating message', payload);
+      await this.chatMessageModel.create(payload);
+    }
+
+    // const createdMessage = await this.chatMessageModel.create(payload);
+
+    // const _room = await this.chatRoomService.chatRoomModel
+    //   .findOne({
+    //     _id: payload.chatRoom,
+    //   })
+    //   .populate('members');
 
     // Update last message
-    const updatedRoom = await this.chatRoomService.chatRoomModel.updateOne(
-      { _id: payload.chatRoom },
-      {
-        $set: {
-          lastMessage: payload._id,
-          lastMessageSender: payload.createdBy._id,
-        },
-      },
-    );
-
-    // send socket message to user
-    _room.members.forEach((member) => {
-      this.socketIoGateway.sendSocketMessageToUser(
-        member._id,
-        `room-list-updated:${member._id}`,
-        new RoomListUpdatedSocketEvent({
-          _id: _room._id,
-          actionType: 'room-updated',
-          room: {
-            ..._room.toJSON(),
-            lastMessage: createdMessage.toJSON(),
-            lastMessageSender: payload.createdBy,
-          },
-        }).payload,
-      );
-    });
-
-    console.log(
-      JSON.stringify(
-        {
-          createdMessage,
-          updatedRoom,
-        },
-        null,
-        2,
-      ),
-    );
+    // const updatedRoom = await this.chatRoomService.chatRoomModel.updateOne(
+    //   { _id: payload.chatRoom },
+    //   {
+    //     $set: {
+    //       lastMessage: payload._id,
+    //       lastMessageSender: payload.createdBy._id,
+    //     },
+    //   },
+    // );
   }
 }

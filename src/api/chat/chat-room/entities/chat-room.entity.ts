@@ -57,6 +57,10 @@ export class ChatRoom {
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: User.name })
   kickedUsers: User[];
 
+  @Field(() => Boolean, { nullable: true })
+  @Prop({ default: false })
+  isOngoingCall: boolean;
+
   @Field(() => Date, { nullable: true })
   createdAt?: Date;
 

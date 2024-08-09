@@ -1,4 +1,4 @@
-import { ChatMessageType } from '@/api/chat/chat-message/entities/chat-message.entity';
+import { ChatMessageType } from '@/common/api-models/graphql';
 
 export interface ISendOrUpdateMessageSocketDto {
   roomId: string;

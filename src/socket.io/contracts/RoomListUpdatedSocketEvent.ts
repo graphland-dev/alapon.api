@@ -18,3 +18,9 @@ interface IRoomListUpdatedSocketEvent {
 export class RoomListUpdatedSocketEvent {
   constructor(public payload: IRoomListUpdatedSocketEvent) {}
 }
+
+// export enum SOCKET_EVENT_NAME {
+//   handle__emit__chat__joinRoom = 'emit:chat:join-room',
+//   handle__emit__chat__leaveRoom = 'emit:chat:leave-room',
+//   handle__emit__chat__messages__sendMessage = 'emit:chat:messages:send-message',
+// }
