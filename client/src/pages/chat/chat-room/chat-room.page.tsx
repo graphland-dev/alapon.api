@@ -11,7 +11,10 @@ import RoomMessageComposer from './_components/ChatComposer/RoomMessageComposer'
 import ChatRoomHeader from './_components/ChatRoomHeader';
 import JoinCallModal from './_components/JoinCallModal';
 import RoomMessagesTrack from './_components/RoomMessagesTrack';
-import { ISendOrUpdateMessageSocketDto } from './models/chat.model';
+import {
+  ISendOrUpdateMessageSocketDto,
+  ISocketCallDto,
+} from './models/chat.model';
 import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
 
 const ChatRoomPage = () => {
@@ -63,11 +66,17 @@ const ChatRoomPage = () => {
 
   useEffect(() => {
     socket.on(
-      `listen:chat:${patams.roomId}:call-incoming`,
-      (data: ISendOrUpdateMessageSocketDto) => {
-        console.log('listen:chat:${patams.roomId}:call-incoming', data);
-        isCallOngoingHandler.open();
-        joinCallModalOpenedHandler.open();
+      `listen:chat:${patams.roomId}:ongoing-call`,
+      (data: ISocketCallDto) => {
+        console.log('listen:chat:${patams.roomId}:ongoing-call', data);
+        if (data.isOngoingCall) {
+          isCallOngoingHandler.open();
+          joinCallModalOpenedHandler.open();
+        }
+
+        if (!data.isOngoingCall) {
+          isCallOngoingHandler.close();
+        }
       },
     );
 

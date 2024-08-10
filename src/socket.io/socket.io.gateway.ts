@@ -1,3 +1,4 @@
+import { ChatMessageType } from '@/api/chat/chat-message/entities/chat-message.entity';
 import { Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
@@ -9,9 +10,11 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
+import {
+  ISendOrUpdateMessageSocketDto,
+  ISocketCallDto,
+} from './dtos/socket.dto';
 import { SocketChatService } from './socket-chat.service';
-import { ISendOrUpdateMessageSocketDto } from './dtos/socket.dto';
-import { ChatMessageType } from '@/api/chat/chat-message/entities/chat-message.entity';
 
 @WebSocketGateway({
   namespace: 'socket',
@@ -70,14 +73,26 @@ export class SocketIoGateway
     data: ISendOrUpdateMessageSocketDto,
     @ConnectedSocket() socket: Socket,
   ): void {
-    this.logger.debug(
-      'emit:chat:messages:send-message',
-      JSON.stringify({ data }),
+    this.logger.log(
+      'handle__emit__chat__messages__sendMessage->emit:chat:messages:send-message',
+      JSON.stringify({ data }, null, 2),
     );
-    this.socketChatService.sendMessageToChatRoom(socket, {
-      ...data,
-      messageType: ChatMessageType.USER_MESSAGE,
-    });
+
+    this.socketChatService.sendMessageToChatRoom(
+      (socketCallbackPayload) => {
+        console.log(
+          `🔥 broadcast:chat:${data.roomId}:messages`,
+          socketCallbackPayload,
+        );
+        socket
+          .to(data.roomId)
+          .emit(`listen:chat:${data.roomId}:messages`, socketCallbackPayload);
+      },
+      {
+        ...data,
+        messageType: ChatMessageType.USER_MESSAGE,
+      },
+    );
   }
 
   @SubscribeMessage('emit:chat:messages:update-message')
@@ -91,24 +106,162 @@ export class SocketIoGateway
       'emit:chat:messages:update-message',
       JSON.stringify({ data }),
     );
-    this.socketChatService.updateMessageToChatRoom(socket, data);
+    this.socketChatService.updateMessageToChatRoom(
+      (socketCallbackPayload) =>
+        socket.broadcast
+          .to(data.roomId)
+          .emit(
+            `listen:chat:${data.roomId}:messages:updated`,
+            socketCallbackPayload,
+          ),
+      data,
+    );
   }
 
   @SubscribeMessage('emit:chat:initiate-call')
   // 🔌 -> 📢 listen:chat:{roomId}:call-incoming
   async handle__emit__chat__callOutgoing(
     @MessageBody()
-    data: ISendOrUpdateMessageSocketDto,
+    payload: ISocketCallDto,
     @ConnectedSocket() socket: Socket,
   ): Promise<void> {
-    this.logger.debug('emit:chat:initiate-call', JSON.stringify({ data }));
-    await this.socketChatService.changeRoomOngoinCallStatus(socket, {
-      ...data,
+    this.logger.log(
+      'emit:chat:initiate-call',
+      JSON.stringify({ payload }, null, 2),
+    );
+    await this.socketChatService.changeRoomOngoinCallStatus({
+      ...payload,
       isOngoingCall: true,
     });
+
+    await this.socketChatService.sendMessageToChatRoom(
+      (socketCallbackPayload) =>
+        socket
+          .to(payload.roomId)
+          .emit(
+            `listen:chat:${payload.roomId}:messages`,
+            socketCallbackPayload,
+          ),
+      {
+        messageType: ChatMessageType.SYSTEM_MESSAGE,
+        roomId: payload?.roomId,
+        roomHandle: payload?.roomHandle,
+        userId: payload?.userId,
+        messageText: `${payload.userHandle} started a call`,
+        userHandle: payload?.userHandle,
+      },
+    );
+
+    socket.broadcast
+      .to(payload.roomId)
+      .emit(`listen:chat:${payload.roomId}:ongoing-call`, {
+        ...payload,
+        isOngoingCall: true,
+      });
+  }
+
+  @SubscribeMessage('emit:chat:join-call')
+  // 🔌 -> 📢 listen:chat:{roomId}:call-incoming
+  async handle__emit__chat__JoinCall(
+    @MessageBody()
+    payload: ISocketCallDto,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void> {
+    this.logger.log(
+      'emit:chat:join-call',
+      JSON.stringify({ payload }, null, 2),
+    );
+
+    await this.socketChatService.sendMessageToChatRoom(
+      (socketCallbackPayload) =>
+        socket
+          .to(payload.roomId)
+          .emit(
+            `listen:chat:${payload.roomId}:messages`,
+            socketCallbackPayload,
+          ),
+      {
+        messageType: ChatMessageType.SYSTEM_MESSAGE,
+        roomId: payload?.roomId,
+        roomHandle: payload?.roomHandle,
+        userId: payload?.userId,
+        messageText: `${payload.userHandle} joined to the call`,
+        userHandle: payload?.userHandle,
+      },
+    );
+
+    socket.broadcast
+      .to(payload.roomId)
+      .emit(`listen:chat:${payload.roomId}:ongoing-call`, {
+        ...payload,
+        isOngoingCall: true,
+      });
+  }
+
+  @SubscribeMessage('emit:chat:leave-call')
+  // 🔌 -> 📢 listen:chat:{roomId}:call-incoming
+  async handle__emit__chat__LeaveCall(
+    @MessageBody()
+    payload: ISocketCallDto,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<void> {
+    this.logger.log(
+      'emit:chat:leave-call',
+      JSON.stringify({ payload }, null, 2),
+    );
+
+    await this.socketChatService.sendMessageToChatRoom(
+      (socketCallbackPayload) =>
+        socket
+          .to(payload.roomId)
+          .emit(
+            `listen:chat:${payload.roomId}:messages`,
+            socketCallbackPayload,
+          ),
+      {
+        messageType: ChatMessageType.SYSTEM_MESSAGE,
+        roomId: payload?.roomId,
+        roomHandle: payload?.roomHandle,
+        userId: payload?.userId,
+        messageText: `${payload.userHandle} left the call`,
+        userHandle: payload?.userHandle,
+      },
+    );
+
+    // socket.broadcast
+    //   .to(payload.roomId)
+    //   .emit(`listen:chat:${payload.roomId}:ongoing-call`, {
+    //     ...payload,
+    //     isOngoingCall: false,
+    //   });
   }
 
   // // --------------------------------------------------------------------------------
+  async changeRoomOngoingCallStatus(
+    @MessageBody()
+    payload: ISocketCallDto,
+  ): Promise<void> {
+    await this.socketChatService.changeRoomOngoinCallStatus(payload);
+
+    await this.socketChatService.sendMessageToChatRoom(
+      (payload) =>
+        this.io
+          .to(payload.roomId)
+          .emit(`listen:chat:${payload.roomId}:messages`, payload),
+      {
+        messageType: ChatMessageType.SYSTEM_MESSAGE,
+        roomId: payload?.roomId,
+        roomHandle: payload?.roomHandle,
+        userId: payload?.userId,
+        messageText: `Call room ended`,
+        userHandle: payload?.userHandle,
+      },
+    );
+
+    this.io
+      .to(payload.roomId)
+      .emit(`listen:chat:${payload.roomId}:ongoing-call`, payload, payload);
+  }
 
   // @SubscribeMessage('join-socket')
   // loginUser(

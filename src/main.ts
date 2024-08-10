@@ -1,13 +1,18 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import * as express from 'express';
 import * as cowsay from 'cowsay';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true,
+  });
   const config = app.get(ConfigService);
+
+  app.use(express.raw({ type: 'application/webhook+json' }));
 
   const docOptions = new DocumentBuilder()
     .setTitle('Blackout API')

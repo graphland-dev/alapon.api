@@ -10,7 +10,7 @@ export interface ISendOrUpdateMessageSocketDto {
   messageType: ChatMessageType;
 }
 
-export interface ISocketCallInitiateDto {
+export interface ISocketCallDto {
   roomId?: string;
   roomHandle?: string;
   userId?: string;

@@ -2,6 +2,7 @@ import { TokenService } from '@/common/utils/TokenService';
 import {
   ControlBar,
   LiveKitRoom,
+  useEnsureRoom,
   VideoConference,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
@@ -14,6 +15,22 @@ interface Props {
   onLeave?: () => void;
   onJoin?: () => void;
 }
+
+const LiveKitRoomInner = () => {
+  const room = useEnsureRoom();
+
+  useEffect(() => {
+    room?.on('connected', () => {
+      console.log('🔥🔥🔥 participantConnected');
+    });
+
+    room?.on('disconnected', () => {
+      console.log('🔥🔥🔥 disconnected');
+    });
+  }, [room]);
+
+  return null;
+};
 
 const ChatRoomCall: React.FC<Props> = ({
   roomId,
@@ -62,6 +79,7 @@ const ChatRoomCall: React.FC<Props> = ({
     >
       <VideoConference />
       <ControlBar />
+      <LiveKitRoomInner />
     </LiveKitRoom>
   );
 };

@@ -11,14 +11,19 @@ import {
   Get,
   Post,
   Query,
+  RawBodyRequest,
   Req,
+  Res,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
+import { SocketIoGateway } from '@/socket.io/socket.io.gateway';
 
 @Controller('api/livekit')
 @ApiTags('Livekit')
 export class LivekitController {
+  constructor(private socketIoGateway: SocketIoGateway) {}
+
   livekitWebhookReceiver = new liveKit.WebhookReceiver(
     process.env.LIVEKIT_API_KEY,
     process.env.LIVEKIT_API_SECRET,
@@ -46,29 +51,38 @@ export class LivekitController {
   }
 
   @Post('webhook')
-  async handleLivekitWebhook(@Req() req: Request) {
+  async handleLivekitWebhook(
+    @Req() req: RawBodyRequest<Request>,
+    @Res() res: Response,
+  ) {
     try {
-      // const webhookEvent: liveKit.WebhookEvent =
-      //   this.livekitWebhookReceiver.receive(
-      //     req?.body,
-      //     req?.get('Authorization'),
-      //   );
-
-      console.log(JSON.stringify({ webhookBody: req.body }, null, 2));
-      const webhookEvent = req.body as liveKit.WebhookEvent;
+      // const body = JSON.parse(Buffer.from(req.body).toString());
+      const webhookEvent: liveKit.WebhookEvent =
+        this.livekitWebhookReceiver.receive(
+          req?.body,
+          req?.get('Authorization'),
+        );
 
       switch (webhookEvent.event) {
         case 'room_started':
-          // emit:
+          console.log('room_started', webhookEvent);
           break;
         case 'room_finished':
+          console.log('room_finished', webhookEvent);
+          this.socketIoGateway.changeRoomOngoingCallStatus({
+            roomId: webhookEvent.room.name,
+            isOngoingCall: false,
+          });
           break;
-        case 'participant_joined':
-          break;
-        case 'participant_left':
-          break;
+        // case 'participant_joined':
+        //   break;
+        // case 'participant_left':
+        //   break;
       }
+
+      return res.status(200).json({ status: 'ok' });
     } catch (error) {
+      console.log(error.message);
       throw new ForbiddenException(error.message);
     }
   }

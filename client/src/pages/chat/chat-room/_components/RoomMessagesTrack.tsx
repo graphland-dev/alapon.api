@@ -53,13 +53,6 @@ const RoomMessagesTrack: React.FC<Props> = ({ roomId }) => {
   const messagesTrackRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = (isSmooth = true) => {
-    // const timelineDivHeight =
-    //   document.getElementById('chat-room-messages-timeline')?.scrollHeight || 0;
-    // document.getElementById('chat-room-messages-timeline-bottom')?.scroll({
-    //   left: 0,
-    //   top: -timelineDivHeight,
-    //   behavior: 'smooth',
-    // });
     document
       .getElementById('chat-room-messages-timeline-bottom')
       ?.scrollIntoView({ behavior: isSmooth ? 'smooth' : 'auto' });
@@ -98,13 +91,14 @@ const RoomMessagesTrack: React.FC<Props> = ({ roomId }) => {
     socket.emit(`emit:chat:join-room`, { roomId });
 
     const handleSocketNewMessages = (message: ChatMessage) => {
+      console.log(`🔌 listen:chat:${roomId}:messages`, message);
+
       const audio = new Audio('/chat.mp3');
       audio.play();
       document.title = `New Message - ${message.createdBy?.handle}`;
       setTimeout(() => {
         document.title = `Blackout Chat`;
       }, 3000);
-      console.log('🔌 room-messages:', message);
 
       setMessages((messages) => [...messages, message]);
       setTimeout(() => {
@@ -132,6 +126,7 @@ const RoomMessagesTrack: React.FC<Props> = ({ roomId }) => {
     };
 
     socket.on(`listen:chat:${roomId}:messages`, handleSocketNewMessages);
+    console.log(`🔌 listen:chat:${roomId}:messages`);
 
     return () => {
       socket.emit(`emit:chat:leave-room`, { roomId });

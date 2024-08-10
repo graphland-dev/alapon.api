@@ -100,9 +100,8 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
 
   @OnEvent('chatroom:messages:sync')
   async handleSaveMessageEvent(payload: ISendOrUpdateMessageSocketDto) {
-    this.logger.debug('Syncing socket message to database', payload);
+    this.logger.log('chatroom:messages:sync', JSON.stringify(payload, null, 2));
     if (payload.messageId) {
-      this.logger.debug('Updating message', payload);
       const _msg = await this.chatMessageModel.findOne({
         _id: payload.messageId,
       });
@@ -120,7 +119,6 @@ export class ChatMessageService extends BaseDatabaseRepository<ChatMessage> {
         },
       );
     } else {
-      this.logger.debug('Creating message', payload);
       await this.chatMessageModel.create(payload);
     }
 

@@ -1,10 +1,15 @@
 import { ChatMessage, ChatRoomType } from '@/common/api-models/graphql';
+import { socketAtom } from '@/common/states/socket-io.atom';
+import { userAtom } from '@/common/states/user.atom';
 import { Menu, Skeleton, Tooltip } from '@mantine/core';
 import { IconChevronLeft } from '@tabler/icons-react';
+import { useAtomValue } from 'jotai';
 import { EllipsisVertical, Phone, PhoneOutgoing, Video } from 'lucide-react';
 import React from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ISocketCallDto } from '../models/chat.model';
+import { openConfirmModal } from '@mantine/modals';
 
 interface Props {
   roomHandle: string;
@@ -27,6 +32,42 @@ const ChatRoomHeader: React.FC<Props> = ({
   isCallOngoing,
   onClickJoinCall,
 }) => {
+  const socket = useAtomValue(socketAtom);
+  const authUser = useAtomValue(userAtom);
+  const navitate = useNavigate();
+
+  const initiateCall = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const callType = e.currentTarget.dataset.callType as 'video' | 'audio';
+    openConfirmModal({
+      title: `Start ${callType} call`,
+      labels: { confirm: `Start ${callType} call`, cancel: 'Cancel' },
+      onConfirm: () => {
+        socket.emit('emit:chat:initiate-call', {
+          roomId,
+          userHandle: authUser?.handle,
+          userId: authUser?._id,
+        } satisfies ISocketCallDto);
+        navitate(`/chat/${roomId}/${callType}-call`, { replace: true });
+      },
+    });
+  };
+
+  // const joinCall = (e: React.MouseEvent<HTMLButtonElement>) => {
+  //   const callType = e.currentTarget.dataset.callType as 'video' | 'audio';
+  //   openConfirmModal({
+  //     title: `Start ${callType} call`,
+  //     labels: { confirm: `Start ${callType} call`, cancel: 'Cancel' },
+  //     onConfirm: () => {
+  //       socket.emit('emit:chat:join-call', {
+  //         roomId,
+  //         userHandle: authUser?.handle,
+  //         userId: authUser?._id,
+  //       } satisfies ISocketCallDto);
+  //       navitate(`/chat/${roomId}/${callType}-call`, { replace: true });
+  //     },
+  //   });
+  // };
+
   return (
     <div className="px-2 py-2 bg-white h-[65px] flex-none shadow-sm">
       <div className="flex items-center justify-between gap-1">
@@ -74,14 +115,14 @@ const ChatRoomHeader: React.FC<Props> = ({
         ) : (
           <div className="flex items-center gap-3">
             <Tooltip label="Join Video Call">
-              <Link to={`/chat/${roomId}/video-call`}>
+              <button data-call-type="video" onClick={initiateCall}>
                 <Video className="text-zinc-600" size={25} />
-              </Link>
+              </button>
             </Tooltip>
             <Tooltip label="Join Audio Call">
-              <Link to={`/chat/${roomId}/audio-call`}>
+              <button data-call-type="audio" onClick={initiateCall}>
                 <Phone className="text-zinc-600" />
-              </Link>
+              </button>
             </Tooltip>
             <Menu>
               <Menu.Target>
