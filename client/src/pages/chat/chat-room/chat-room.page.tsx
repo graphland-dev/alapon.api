@@ -11,10 +11,7 @@ import RoomMessageComposer from './_components/ChatComposer/RoomMessageComposer'
 import ChatRoomHeader from './_components/ChatRoomHeader';
 import JoinCallModal from './_components/JoinCallModal';
 import RoomMessagesTrack from './_components/RoomMessagesTrack';
-import {
-  ISendOrUpdateMessageSocketDto,
-  ISocketCallDto,
-} from './models/chat.model';
+import { ISocketCallDto } from './models/chat.model';
 import { CHAT_ROOM_DETAILS_QUERY } from './utils/query';
 
 const ChatRoomPage = () => {
