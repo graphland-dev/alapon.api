@@ -7,7 +7,7 @@ import {
 } from '@apollo/client';
 import { TokenService } from '../utils/TokenService';
 
-const httpLink = new HttpLink({ uri: '/graphql' });
+const httpLink = new HttpLink({ uri: import.meta.env.VITE_API_HOST });
 const authMiddleware = new ApolloLink((operation, forward) => {
   const buildHeader = () => {
     const token = TokenService.getToken();

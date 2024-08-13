@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const socket = io('/socket', {
+const socket = io(import.meta.env.VITE_SOCKET_HOST, {
   autoConnect: false, // Connect manually
   reconnectionAttempts: 5, // Retry attempts before failing
   reconnectionDelay: 5000, // Delay between retries
