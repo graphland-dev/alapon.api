@@ -1,5 +1,6 @@
 {
-  "name": "electron-app-play",
+  "name": "blackout-chat",
+  "description": "A simple chat app",
   "version": "1.0.0",
   "main": "src/main.js",
   "scripts": {
@@ -11,7 +12,6 @@
   "keywords": [],
   "author": "kingrayhan",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1"
   },
