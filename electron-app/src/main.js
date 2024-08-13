@@ -1,4 +1,4 @@
-const { app, BrowserWindow, screen, Menu } = require('electron');
+const { app, BrowserWindow, screen, Menu, Notification } = require('electron');
 const path = require('path');
 const isDev = app.isPackaged ? false : true;
 
@@ -29,10 +29,10 @@ const menu = Menu.buildFromTemplate([
     role: 'help',
     submenu: [
       {
-        label: 'Learn More',
+        label: 'Contact Developer',
         click: async () => {
           const { shell } = require('electron');
-          await shell.openExternal('https://electronjs.org');
+          await shell.openExternal('https://github.com/kingRayhan/');
         },
       },
     ],
@@ -49,38 +49,34 @@ const createWindow = () => {
   const _window = new BrowserWindow({
     width: width - 200,
     height: height - 200,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
-
-  // if (process.env.NODE_ENV === 'prod') {
-  //   _window.webContents.openDevTools();
-  //   _window.loadFile(__dirname + '/../client/dist/index.html');
-  // } else {
-  //   _window.loadURL('https://github.com/kingRayhan/');
-  // }
-
-  // _window.loadFile(__dirname + '/../client/dist/index.html');
-  // _window.webContents.openDevTools();
-  // if (process.env.NODE_ENV === 'dev') {
-  //   _window.webContents.openDevTools();
-  //   _window.loadURL('http://localhost:3000');
-  // } else {
-  //   fs.copySync('../client/dist', './dist');
-  //   _window.loadFile('./dist/index.html');
-  //   _window.webContents.openDevTools();
-  // }
+  const _splashWindow = new BrowserWindow({
+    width: 500,
+    height: 500,
+    show: true,
+    transparent: true,
+    frame: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  });
+  _splashWindow.loadFile(path.join(__dirname, '/splash.html'));
 
   const startURL = isDev
     ? 'http://localhost:3000'
     : `file://${path.join(__dirname, '../client-dist/index.html')}`;
-
   _window.loadURL(startURL);
 
-  _window.webContents.openDevTools();
+  setTimeout(() => {
+    _splashWindow.close();
+    _window.show();
+  }, 5000);
 
-  console.log('---------- building ----------');
+  // if (isDev) _window.webContents.openDevTools();
 };
 
 app.whenReady().then(() => {

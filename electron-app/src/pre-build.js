@@ -5,6 +5,7 @@ const path = require('path');
 
 process.env.VITE_API_HOST = 'https://blackout.rayhan.dev/graphql';
 process.env.VITE_SOCKET_HOST = 'wss://blackout.rayhan.dev/socket';
+process.env.NODE_ENV = 'prod';
 
 // build the web client
 child_process.execSync('cd ../web-client && npm run build', {});
