@@ -1,7 +1,9 @@
-# .github/workflows/release.yml
 name: Release Electron Apps
+
 on:
-  workflow_dispatch:
+  release:
+    types: [published]
+
 jobs:
   build:
     strategy:
@@ -20,9 +22,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: cd electron-app
-      - run: npm install
       - name: Publish app
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: npm run publish
+        run: cd electron-app && npm install && npm run publish
