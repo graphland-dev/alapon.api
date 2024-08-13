@@ -3,8 +3,8 @@ import type { ForgeConfig } from '@electron-forge/shared-types';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
-    name: 'BlackMagic',
-    executableName: 'blackmagic',
+    name: 'Blackout Chat',
+    executableName: 'blackout-chat',
     osxSign: {},
     icon: './electron/icons',
   },
