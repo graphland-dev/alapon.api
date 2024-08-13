@@ -2,6 +2,7 @@ name: Release Electron Apps
 
 on:
   release:
+    types: [published]
 
 jobs:
   build:
