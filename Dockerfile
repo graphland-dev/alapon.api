@@ -3,9 +3,9 @@
 ######################################
 FROM node:22.5.1-alpine3.20 As client-build
 USER node
-WORKDIR /application/client-src
+WORKDIR /application/web-client
 COPY --chown=node:node ./web-client/package*.json ./
-RUN npm i && npm cache clean --force
+RUN npm install
 COPY --chown=node:node ./web-client .
 # ENV NODE_ENV production
 RUN npm run build
@@ -38,7 +38,6 @@ WORKDIR /application
 
 COPY --chown=node:node --from=build /application/node_modules ./node_modules
 COPY --chown=node:node --from=build /application/dist ./dist
-# COPY --chown=node:node --from=build /application/client/dist ./client/dist
-COPY --chown=node:node --from=client-build /application/client-src/dist ./client/dist
+COPY --chown=node:node --from=client-build /application/web-client/dist ./web-client/dist
 
 CMD [ "node", "dist/main.js" ]

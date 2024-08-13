@@ -1,3 +1,8 @@
+# Client
+/web-client/node_modules
+/web-client/dist
+
+
 Dockerfile
 .dockerignore
 .docker-files
