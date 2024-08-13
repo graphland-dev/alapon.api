@@ -8,6 +8,18 @@ const config: ForgeConfig = {
     osxSign: {},
     icon: './electron/icons',
   },
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'graphland-dev',
+          name: 'blackout-chat',
+        },
+        prerelease: true,
+      },
+    },
+  ],
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
