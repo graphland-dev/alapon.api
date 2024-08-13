@@ -25,7 +25,7 @@ import { LivekitModule } from './api/livekit/livekit.module';
     //   exclude: ['/api/*', '/graphql'],
     // }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client/dist'),
+      rootPath: join(__dirname, '..', 'web-client/dist'),
       exclude: ['/api/(.*)', '/graphql', '/docs'],
     }),
     EventEmitterModule.forRoot(),

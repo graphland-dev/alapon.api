@@ -4,9 +4,9 @@
 FROM node:22.5.1-alpine3.20 As client-build
 USER node
 WORKDIR /application/client-src
-COPY --chown=node:node ./client/package*.json ./
+COPY --chown=node:node ./web-client/package*.json ./
 RUN npm i && npm cache clean --force
-COPY --chown=node:node ./client .
+COPY --chown=node:node ./web-client .
 # ENV NODE_ENV production
 RUN npm run build
 
