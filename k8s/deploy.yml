@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+spec:
+  selector:
+    matchLabels:
+      app: blackout-chat-pod
+  template:
+    metadata:
+      labels:
+        app: blackout-chat-pod
+    spec:
+      containers:
+      - name: blackout-chat
+        image: kingrayhan/blackout-chat:latest
+        resources:
+        ports:
+        - containerPort: 4001
+        env:
+          - name: PORT
+            value: "4001"
+          - name: MONGODB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: mongodb-config
+                key: database-host
+          - name: MONGODB_DATABASE_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: mongodb-config
+                key: database-name
+          - name: MONGODB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: blackout-chat-secret
+                key: mongodb-username
+          - name: MONGODB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: blackout-chat-secret
+                key: mongodb-password
+          - name: DATABASE_URL
+            value: mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@$(MONGODB_HOST):27017
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-deployment
+spec:
+  selector:
+    matchLabels:
+      app: mongodb-pod
+  template:
+    metadata:
+      labels:
+        app: mongodb-pod
+    spec:
+      containers:
+      - name: mongodb-container
+        image: mongo
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: blackout-chat-secret
+                key: mongodb-username
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: blackout-chat-secret
+                key: mongodb-password
+        resources:
+        ports:
+        - containerPort: 27017
