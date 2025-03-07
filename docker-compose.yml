@@ -1,6 +1,6 @@
 services:
   service:
-    container_name: alapon_service
+    container_name: alapon
     build:
       dockerfile: Dockerfile
       context: .
