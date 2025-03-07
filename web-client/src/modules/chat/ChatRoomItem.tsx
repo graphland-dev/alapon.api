@@ -4,6 +4,7 @@ interface Props {
   room: ChatRoom;
 }
 const ChatRoomItem: React.FC<Props> = ({ room }) => {
+  console.log(room);
   // const params = useParams<{ roomId: string }>();
   // const authUser = useAtomValue(userAtom);
 

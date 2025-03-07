@@ -1,9 +1,7 @@
-import { gql, gqlRequest } from '@/common/clients/api-client';
 import { ErrorMessage } from '@hookform/error-message';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Alert, Button, Input, Paper, PinInput } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
-import { useMutation } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -14,14 +12,14 @@ interface Props {
   apiError?: string;
 }
 const JoinForm: React.FC<Props> = ({ onSubmit, loading, apiError }) => {
-  const getUniqueHandleMutation = useMutation({
-    mutationFn: (variables: { handle: string }) =>
-      gqlRequest<{ identity__getUniqueHandle: string }>({
-        variables,
-        query: UNIQUE_HANDLE_QUERY,
-        options: { passAccessToken: true },
-      }),
-  });
+  // const getUniqueHandleMutation = useMutation({
+  //   mutationFn: (variables: { handle: string }) =>
+  //     gqlRequest<{ identity__getUniqueHandle: string }>({
+  //       variables,
+  //       query: UNIQUE_HANDLE_QUERY,
+  //       options: { passAccessToken: true },
+  //     }),
+  // });
 
   const form = useForm<IForm>({
     defaultValues: {},
@@ -34,6 +32,7 @@ const JoinForm: React.FC<Props> = ({ onSubmit, loading, apiError }) => {
 
   const debouncedState__handle = useDebouncedCallback(
     async (handle: string) => {
+      console.log(handle);
       // uniqueHandleQuery({ variables: { handle } }).then((data) => {
       //   if (data.data?.identity__getUniqueHandle) {
       //     form.setValue('handle', data?.data?.identity__getUniqueHandle);
@@ -143,8 +142,8 @@ const validationSchema = yup.object({
 
 type IForm = yup.InferType<typeof validationSchema>;
 
-const UNIQUE_HANDLE_QUERY = gql`
-  query UniqueHandle($handle: String!) {
-    identity__getUniqueHandle(handle: $handle)
-  }
-`;
+// const UNIQUE_HANDLE_QUERY = gql`
+//   query UniqueHandle($handle: String!) {
+//     identity__getUniqueHandle(handle: $handle)
+//   }
+// `;

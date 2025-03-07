@@ -1,51 +1,24 @@
-import { ChatRoom, ChatRoomsWithPagination } from '@/common/api-models/graphql';
-import { RoomListUpdatedSocketEvent } from '@/common/common-models/RoomListUpdatedSocketEvent';
-import ResetPinForm from '@/common/components/forms/ResetPinForm';
-import EmptyChatLottieFile from '@/common/lottie-files/empty-chat-lottie.json';
-import { $triggerRefetchChatRooms } from '@/common/rxjs-controllers';
-import { socketAtom } from '@/common/states/socket-io.atom';
-import { userAtom } from '@/common/states/user.atom';
-import playNotificationSoundAndSetDocumentTitle from '@/common/utils/playNotificationSound';
-import { TokenService } from '@/common/utils/TokenService';
-import { gql, useQuery } from '@apollo/client';
-import { Menu, Modal, Skeleton, UnstyledButton } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { openConfirmModal } from '@mantine/modals';
-import {
-  IconChevronDown,
-  IconDotsVertical,
-  IconLogout,
-} from '@tabler/icons-react';
-import { useAtomValue } from 'jotai';
-import { clone } from 'radash';
-import Lottie from 'lottie-react';
-import { useEffect, useState } from 'react';
-import ChatRoomItem from './ChatRoomItem';
-import JoinInPersonForm from './modal-forms/JoinInPersonForm';
-import CreateGroupForm from './modal-forms/CreateGroupForm';
-import JoinInGroupForm from './modal-forms/JoinInGroupForm';
-
-const MY_CHAT_ROOMS_QUERY = gql`
-  query Chat__myChatRooms($where: CommonPaginationOnlyDto) {
-    chat__myChatRooms(where: $where) {
-      nodes {
-        _id
-        handle
-        members {
-          handle
-        }
-        lastMessage {
-          text
-        }
-        lastMessageSender {
-          handle
-        }
-        isNsfw
-        roomType
-      }
-    }
-  }
-`;
+// const MY_CHAT_ROOMS_QUERY = gql`
+//   query Chat__myChatRooms($where: CommonPaginationOnlyDto) {
+//     chat__myChatRooms(where: $where) {
+//       nodes {
+//         _id
+//         handle
+//         members {
+//           handle
+//         }
+//         lastMessage {
+//           text
+//         }
+//         lastMessageSender {
+//           handle
+//         }
+//         isNsfw
+//         roomType
+//       }
+//     }
+//   }
+// `;
 
 const ChatSidebar = () => {
   return (
