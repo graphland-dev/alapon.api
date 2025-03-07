@@ -73,10 +73,9 @@
 
   body {
     background-color: var(--body);
+    color: hsl(var(--foreground));
   }
 }
-
-@import 'message';
 
 .chat-app {
   @apply overflow-hidden;
@@ -113,4 +112,49 @@
 
 .chat-message-emoji {
   font-size: 3.2em;
+}
+
+.chat-message-bubble {
+  border-radius: 10px;
+  max-width: 80%;
+
+  a {
+    @apply hover:underline;
+  }
+
+  &__user-handle {
+    @apply text-xs font-semibold mb-1;
+  }
+
+  &--self &__content {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  &__content {
+    background-color: hsl(var(--background));
+    white-space: pre-wrap;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  &__time {
+    @apply text-xs text-muted-foreground italic lowercase;
+  }
+  &--self &__time {
+    @apply text-right;
+    margin-top: 2px;
+  }
+
+  &--oposition {
+    align-self: flex-start;
+  }
+
+  &--self {
+    align-self: flex-end;
+    a {
+      color: hsl(var(--primary-foreground));
+      @apply text-primary-foreground hover:underline;
+    }
+  }
 }

@@ -4,14 +4,15 @@ import { Dropzone } from '@mantine/dropzone';
 import React from 'react';
 import * as yup from 'yup';
 
+import { ResetPinInput } from '@/common/api-models/graphql';
+import { gql, gqlRequest } from '@/common/clients/api-client';
 import { userAtom } from '@/common/states/user.atom';
-import { getGqlServerError } from '@/common/utils/getGqlServerError';
-import { gql, useMutation } from '@apollo/client';
 import { ErrorMessage } from '@hookform/error-message';
 import {
   IconLockSquareRoundedFilled,
   IconSquareRoundedCheckFilled,
 } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
 import { useAtomValue } from 'jotai';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
@@ -27,17 +28,29 @@ interface ResetPinFormProps {
 const ResetPinForm: React.FC<ResetPinFormProps> = ({ onComplete }) => {
   const authUser = useAtomValue(userAtom);
 
-  const [changePinMutation, changePinMutationState] = useMutation(
-    UPDATE_PIN_MUTATION,
-    {
-      onCompleted: () => {
-        onComplete?.();
-      },
-      onError: (error) => {
-        console.log(error);
-      },
+  // const [changePinMutation, changePinMutationState] = useMutation(
+  //   UPDATE_PIN_MUTATION,
+  //   {
+  //     onCompleted: () => {
+  //       onComplete?.();
+  //     },
+  //     onError: (error) => {
+  //       console.log(error);
+  //     },
+  //   },
+  // );
+
+  const changePinMutation = useMutation({
+    mutationFn: (variables: { input: ResetPinInput }) =>
+      gqlRequest<{ identity__resetPin: boolean }>({
+        variables,
+        query: UPDATE_PIN_MUTATION,
+        options: { passAccessToken: true },
+      }),
+    onSuccess: () => {
+      onComplete?.();
     },
-  );
+  });
 
   const form = useForm<IForm>({
     defaultValues: {
@@ -47,7 +60,7 @@ const ResetPinForm: React.FC<ResetPinFormProps> = ({ onComplete }) => {
   });
 
   const handleOnSubmit: SubmitHandler<IForm> = (data) => {
-    changePinMutation({ variables: { input: data } });
+    changePinMutation.mutate({ input: data });
   };
 
   const handleReadSecretFromFile = (files: File[]) => {
@@ -69,13 +82,13 @@ const ResetPinForm: React.FC<ResetPinFormProps> = ({ onComplete }) => {
         </p>
       </div>
 
-      {changePinMutationState.error && (
+      {changePinMutation.isError && (
         <Alert color="red" title="Hands up" radius="md">
-          {getGqlServerError(changePinMutationState.error!)}
+          {changePinMutation?.error?.message}
         </Alert>
       )}
 
-      {changePinMutationState.data && (
+      {changePinMutation.data && (
         <Alert color="green" title="Yahoo!" radius="md">
           Pin changed successfully
         </Alert>
@@ -151,7 +164,7 @@ const ResetPinForm: React.FC<ResetPinFormProps> = ({ onComplete }) => {
           />
         </Input.Wrapper>
 
-        <Button loading={changePinMutationState.loading} type="submit">
+        <Button loading={changePinMutation.isPending} type="submit">
           Change Pin
         </Button>
       </form>

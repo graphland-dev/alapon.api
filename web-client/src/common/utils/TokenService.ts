@@ -1,13 +1,13 @@
 export class TokenService {
   public static getToken(): string | null {
-    return localStorage.getItem('blackout:accessToken');
+    return localStorage.getItem('alapon:accessToken');
   }
 
   public static setToken(token: string) {
-    localStorage.setItem('blackout:accessToken', token);
+    localStorage.setItem('alapon:accessToken', token);
   }
 
   public static removeToken() {
-    localStorage.removeItem('blackout:accessToken');
+    localStorage.removeItem('alapon:accessToken');
   }
 }

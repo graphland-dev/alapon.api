@@ -1,21 +1,18 @@
-import { ApolloProvider } from '@apollo/client';
 import { MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Provider as JotaiProvider } from 'jotai';
-import { RouterProvider } from 'react-router-dom';
-import { apolloClient } from './common/clients/apollo.client';
-import RootAppWrapper from './common/components/RootAppWrapper';
 import { jotaiStore } from './common/configs/jotai.store-config';
 import { mantineThemeConfig } from './common/configs/mantine.config';
-import { AppRoute } from './root.router';
+import { tanstackQueryClient } from './common/configs/tanstack-query-client';
 
-function RootApp() {
-  console.log('Rendering RootApp');
+function RootProvider({ children }: { children: React.ReactNode }) {
+  console.log('Rendering RootProvider');
 
   return (
     <>
-      <ApolloProvider client={apolloClient}>
+      <QueryClientProvider client={tanstackQueryClient}>
         <MantineProvider
           withCssVariables
           withGlobalClasses
@@ -23,19 +20,16 @@ function RootApp() {
         >
           <ModalsProvider>
             <Notifications position="top-center" />
-            {/* {import.meta.env.NODE_ENV !== 'prod' && (
-              <JotaiDevtools store={jotaiStore} />
-            )} */}
             <JotaiProvider store={jotaiStore}>
-              <RootAppWrapper>
-                <RouterProvider router={AppRoute} />
-              </RootAppWrapper>
+              {/* <RootAppWrapper> */}
+              {children}
+              {/* </RootAppWrapper> */}
             </JotaiProvider>
           </ModalsProvider>
         </MantineProvider>
-      </ApolloProvider>
+      </QueryClientProvider>
     </>
   );
 }
 
-export default RootApp;
+export default RootProvider;
