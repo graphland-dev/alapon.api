@@ -24,10 +24,10 @@ import { LivekitModule } from './api/livekit/livekit.module';
     //   rootPath: join(__dirname, '..', 'files'),
     //   exclude: ['/api/*', '/graphql'],
     // }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'web-client/dist'),
-      exclude: ['/api/(.*)', '/graphql', '/docs'],
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'web-client/dist'),
+    //   exclude: ['/api/(.*)', '/graphql', '/docs'],
+    // }),
     EventEmitterModule.forRoot(),
     MongooseModule.forRoot(process.env.DATABASE_URL, {
       dbName: 'backout-chat-' + process.env.NODE_ENV,
