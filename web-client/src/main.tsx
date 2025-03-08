@@ -7,21 +7,22 @@ import 'jotai-devtools/styles.css';
 import './styles/app.scss';
 
 // Import the generated route tree
-import {
-  createHashHistory,
-  createRouter,
-  RouterProvider,
-} from '@tanstack/react-router';
-import { StrictMode } from 'react';
+import { createHashHistory, createRouter } from '@tanstack/react-router';
+import AppCommonProvider from './common/components/AppCommonProvider';
+import Root from './Root';
 import { routeTree } from './routeTree.gen';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { tanstackQueryClient } from './common/configs/tanstack-query-client';
 
 // Create a new router instance
-const router = createRouter({
+export const router = createRouter({
   routeTree,
-  history: createHashHistory(), // 👈 Enables hash-based routing
-  // Since we're using React Query, we don't want loader calls to ever be stale
-  // This will ensure that the loader is always called when the route is preloaded or visited
   defaultPreloadStaleTime: 0,
+  context: {
+    auth: undefined!,
+  },
+  history: createHashHistory(), // 👈 for enabling hash routing
+  defaultNotFoundComponent: () => <h1>404</h1>,
   defaultPendingComponent: () => <h1>Loading...</h1>,
 });
 
@@ -32,15 +33,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// ReactDOM.createRoot(document.getElementById('root')!).render(<RootApp />);
-
 // Render the app
 const rootElement = document.getElementById('root')!;
+
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
-    <StrictMode>
-      <RouterProvider router={router} />
-    </StrictMode>,
+    <QueryClientProvider client={tanstackQueryClient}>
+      <AppCommonProvider>
+        <Root />
+      </AppCommonProvider>
+    </QueryClientProvider>,
   );
 }

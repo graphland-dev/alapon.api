@@ -1,16 +1,33 @@
 import { LoginInput, LoginResponse } from '@/common/api-models/graphql';
 import { gql, gqlRequest } from '@/common/clients/api-client';
+import { fetchME } from '@/common/states/auth.atom';
 import { TokenService } from '@/common/utils/TokenService';
 
 import { ErrorMessage } from '@hookform/error-message';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Alert, Button, Input, Paper, PinInput } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
-import { createLazyFileRoute, Link } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import * as yup from 'yup';
+import { z } from 'zod';
 
-export const Route = createLazyFileRoute('/auth/login')({
+export const Route = createFileRoute('/auth/login')({
+  validateSearch: z.object({
+    redirect: z.string().optional(),
+  }),
+  beforeLoad({ search, context }) {
+    if (context.auth.isAuthenticated) {
+      return redirect({
+        to: search?.redirect ?? '/',
+      });
+    }
+  },
   component: RouteComponent,
 });
 
@@ -23,6 +40,7 @@ const LOGIN_MUTATION = gql`
 `;
 
 function RouteComponent() {
+  const router = useRouter();
   const form = useForm<yup.InferType<typeof validationSchema>>({
     defaultValues: {},
     resolver: yupResolver(validationSchema),
@@ -35,8 +53,11 @@ function RouteComponent() {
         query: LOGIN_MUTATION,
         options: { passAccessToken: true },
       }),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       TokenService.setToken(data?.identity__login?.token);
+
+      await fetchME();
+      router.invalidate();
     },
   });
 

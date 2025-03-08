@@ -13,30 +13,16 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as AuthLoginImport } from './routes/auth/login'
 
 // Create Virtual Routes
 
-const ChatLazyImport = createFileRoute('/chat')()
-const AuthLazyImport = createFileRoute('/auth')()
 const IndexLazyImport = createFileRoute('/')()
 const ChatIndexLazyImport = createFileRoute('/chat/')()
 const AuthResetPinLazyImport = createFileRoute('/auth/reset-pin')()
-const AuthLoginLazyImport = createFileRoute('/auth/login')()
 const AuthJoinLazyImport = createFileRoute('/auth/join')()
 
 // Create/Update Routes
-
-const ChatLazyRoute = ChatLazyImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/chat.lazy').then((d) => d.Route))
-
-const AuthLazyRoute = AuthLazyImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/auth.lazy').then((d) => d.Route))
 
 const IndexLazyRoute = IndexLazyImport.update({
   id: '/',
@@ -45,30 +31,30 @@ const IndexLazyRoute = IndexLazyImport.update({
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 
 const ChatIndexLazyRoute = ChatIndexLazyImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ChatLazyRoute,
+  id: '/chat/',
+  path: '/chat/',
+  getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/chat/index.lazy').then((d) => d.Route))
 
 const AuthResetPinLazyRoute = AuthResetPinLazyImport.update({
-  id: '/reset-pin',
-  path: '/reset-pin',
-  getParentRoute: () => AuthLazyRoute,
+  id: '/auth/reset-pin',
+  path: '/auth/reset-pin',
+  getParentRoute: () => rootRoute,
 } as any).lazy(() =>
   import('./routes/auth/reset-pin.lazy').then((d) => d.Route),
 )
 
-const AuthLoginLazyRoute = AuthLoginLazyImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AuthLazyRoute,
-} as any).lazy(() => import('./routes/auth/login.lazy').then((d) => d.Route))
-
 const AuthJoinLazyRoute = AuthJoinLazyImport.update({
-  id: '/join',
-  path: '/join',
-  getParentRoute: () => AuthLazyRoute,
+  id: '/auth/join',
+  path: '/auth/join',
+  getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/auth/join.lazy').then((d) => d.Route))
+
+const AuthLoginRoute = AuthLoginImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -81,96 +67,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatLazyImport
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginImport
       parentRoute: typeof rootRoute
     }
     '/auth/join': {
       id: '/auth/join'
-      path: '/join'
+      path: '/auth/join'
       fullPath: '/auth/join'
       preLoaderRoute: typeof AuthJoinLazyImport
-      parentRoute: typeof AuthLazyImport
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginLazyImport
-      parentRoute: typeof AuthLazyImport
+      parentRoute: typeof rootRoute
     }
     '/auth/reset-pin': {
       id: '/auth/reset-pin'
-      path: '/reset-pin'
+      path: '/auth/reset-pin'
       fullPath: '/auth/reset-pin'
       preLoaderRoute: typeof AuthResetPinLazyImport
-      parentRoute: typeof AuthLazyImport
+      parentRoute: typeof rootRoute
     }
     '/chat/': {
       id: '/chat/'
-      path: '/'
-      fullPath: '/chat/'
+      path: '/chat'
+      fullPath: '/chat'
       preLoaderRoute: typeof ChatIndexLazyImport
-      parentRoute: typeof ChatLazyImport
+      parentRoute: typeof rootRoute
     }
   }
 }
 
 // Create and export the route tree
 
-interface AuthLazyRouteChildren {
-  AuthJoinLazyRoute: typeof AuthJoinLazyRoute
-  AuthLoginLazyRoute: typeof AuthLoginLazyRoute
-  AuthResetPinLazyRoute: typeof AuthResetPinLazyRoute
-}
-
-const AuthLazyRouteChildren: AuthLazyRouteChildren = {
-  AuthJoinLazyRoute: AuthJoinLazyRoute,
-  AuthLoginLazyRoute: AuthLoginLazyRoute,
-  AuthResetPinLazyRoute: AuthResetPinLazyRoute,
-}
-
-const AuthLazyRouteWithChildren = AuthLazyRoute._addFileChildren(
-  AuthLazyRouteChildren,
-)
-
-interface ChatLazyRouteChildren {
-  ChatIndexLazyRoute: typeof ChatIndexLazyRoute
-}
-
-const ChatLazyRouteChildren: ChatLazyRouteChildren = {
-  ChatIndexLazyRoute: ChatIndexLazyRoute,
-}
-
-const ChatLazyRouteWithChildren = ChatLazyRoute._addFileChildren(
-  ChatLazyRouteChildren,
-)
-
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
-  '/auth': typeof AuthLazyRouteWithChildren
-  '/chat': typeof ChatLazyRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
   '/auth/join': typeof AuthJoinLazyRoute
-  '/auth/login': typeof AuthLoginLazyRoute
   '/auth/reset-pin': typeof AuthResetPinLazyRoute
-  '/chat/': typeof ChatIndexLazyRoute
+  '/chat': typeof ChatIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
-  '/auth': typeof AuthLazyRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
   '/auth/join': typeof AuthJoinLazyRoute
-  '/auth/login': typeof AuthLoginLazyRoute
   '/auth/reset-pin': typeof AuthResetPinLazyRoute
   '/chat': typeof ChatIndexLazyRoute
 }
@@ -178,33 +119,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
-  '/auth': typeof AuthLazyRouteWithChildren
-  '/chat': typeof ChatLazyRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
   '/auth/join': typeof AuthJoinLazyRoute
-  '/auth/login': typeof AuthLoginLazyRoute
   '/auth/reset-pin': typeof AuthResetPinLazyRoute
   '/chat/': typeof ChatIndexLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/auth'
-    | '/chat'
-    | '/auth/join'
-    | '/auth/login'
-    | '/auth/reset-pin'
-    | '/chat/'
+  fullPaths: '/' | '/auth/login' | '/auth/join' | '/auth/reset-pin' | '/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/auth/join' | '/auth/login' | '/auth/reset-pin' | '/chat'
+  to: '/' | '/auth/login' | '/auth/join' | '/auth/reset-pin' | '/chat'
   id:
     | '__root__'
     | '/'
-    | '/auth'
-    | '/chat'
-    | '/auth/join'
     | '/auth/login'
+    | '/auth/join'
     | '/auth/reset-pin'
     | '/chat/'
   fileRoutesById: FileRoutesById
@@ -212,14 +142,18 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
-  AuthLazyRoute: typeof AuthLazyRouteWithChildren
-  ChatLazyRoute: typeof ChatLazyRouteWithChildren
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthJoinLazyRoute: typeof AuthJoinLazyRoute
+  AuthResetPinLazyRoute: typeof AuthResetPinLazyRoute
+  ChatIndexLazyRoute: typeof ChatIndexLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
-  AuthLazyRoute: AuthLazyRouteWithChildren,
-  ChatLazyRoute: ChatLazyRouteWithChildren,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthJoinLazyRoute: AuthJoinLazyRoute,
+  AuthResetPinLazyRoute: AuthResetPinLazyRoute,
+  ChatIndexLazyRoute: ChatIndexLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -233,42 +167,26 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/auth",
-        "/chat"
+        "/auth/login",
+        "/auth/join",
+        "/auth/reset-pin",
+        "/chat/"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
-    "/auth": {
-      "filePath": "auth.lazy.tsx",
-      "children": [
-        "/auth/join",
-        "/auth/login",
-        "/auth/reset-pin"
-      ]
-    },
-    "/chat": {
-      "filePath": "chat.lazy.tsx",
-      "children": [
-        "/chat/"
-      ]
+    "/auth/login": {
+      "filePath": "auth/login.tsx"
     },
     "/auth/join": {
-      "filePath": "auth/join.lazy.tsx",
-      "parent": "/auth"
-    },
-    "/auth/login": {
-      "filePath": "auth/login.lazy.tsx",
-      "parent": "/auth"
+      "filePath": "auth/join.lazy.tsx"
     },
     "/auth/reset-pin": {
-      "filePath": "auth/reset-pin.lazy.tsx",
-      "parent": "/auth"
+      "filePath": "auth/reset-pin.lazy.tsx"
     },
     "/chat/": {
-      "filePath": "chat/index.lazy.tsx",
-      "parent": "/chat"
+      "filePath": "chat/index.lazy.tsx"
     }
   }
 }

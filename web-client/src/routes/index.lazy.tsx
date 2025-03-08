@@ -1,3 +1,4 @@
+import { useAuthState } from '@/common/states/auth.atom';
 import { createLazyFileRoute, Link } from '@tanstack/react-router';
 
 export const Route = createLazyFileRoute('/')({
@@ -5,14 +6,17 @@ export const Route = createLazyFileRoute('/')({
 });
 
 function HomePage() {
+  const authState = useAuthState();
   return (
     <div className="flex flex-col items-center justify-center h-[100dvh] border-b-[6px] border-b-[#25D366]">
       <div className="text-center">
-        <h2 className="mt-4 text-2xl">Blackout Chat</h2>
+        <h2 className="mt-4 text-2xl">Alapon Chat</h2>
         <p className="text-sm text-[#667781] my-3">
           Send and receive messages without keeping your phone online.
         </p>
       </div>
+
+      <pre>{JSON.stringify(authState, null, 2)}</pre>
 
       <p className="text-sm text-[#667781] flex items-center gap-1">
         <svg

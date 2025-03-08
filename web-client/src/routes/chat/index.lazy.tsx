@@ -17,5 +17,4 @@ function RouteComponent() {
       {isMobile && <ChatSidebar />}
     </div>
   );
-  return <h1>Hello "/chat/"!</h1>;
 }
