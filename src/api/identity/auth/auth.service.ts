@@ -13,6 +13,7 @@ import mongoose from 'mongoose';
 import { ReferenceRequestService } from '../reference-request/reference-request.service';
 import { ReferenceRequestStatus } from '../reference-request/entities/reference-request.entity';
 import { slugify } from '@/common/utils/slug';
+import crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
