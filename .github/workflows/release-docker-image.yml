@@ -22,5 +22,5 @@ jobs:
           context: .
           push: true
           tags: |
-            kingrayhan/alapon:latest
-            kingrayhan/alapon:${{ github.ref_name }}
+            kingrayhan/alapon-api:latest
+            kingrayhan/alapon-api:${{ github.ref_name }}
